@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-vue-next"
+  IconCreditCard,
+  IconDotsVertical,
+  IconLogout,
+  IconNotification,
+  IconUserCircle,
+} from "@tabler/icons-vue"
 
 import {
   Avatar,
@@ -31,21 +28,16 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar'
 
-const authStore = useAuthStore()
+interface User {
+  name: string
+  email: string
+  avatar: string
+}
 
-// Compute safe user with fallback
-const user = computed(() => {
-  const u = authStore.user
-  if (!u) return { name: 'User', email: '', avatar: '' }
-  const name = u.first_name && u.last_name 
-    ? `${u.first_name} ${u.last_name}` 
-    : u.username || 'User'
-  return {
-    name,
-    email: u.email,
-    avatar: '' // No avatar field; use placeholder or add to API
-  }
-})
+defineProps<{
+  user: User
+}>()
+
 const { isMobile } = useSidebar()
 </script>
 
@@ -58,7 +50,7 @@ const { isMobile } = useSidebar()
             size="lg"
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
-            <Avatar class="h-8 w-8 rounded-lg">
+            <Avatar class="h-8 w-8 rounded-lg grayscale">
               <AvatarImage :src="user.avatar" :alt="user.name" />
               <AvatarFallback class="rounded-lg">
                 CN
@@ -66,16 +58,18 @@ const { isMobile } = useSidebar()
             </Avatar>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-medium">{{ user.name }}</span>
-              <span class="truncate text-xs">{{ user.email }}</span>
+              <span class="text-muted-foreground truncate text-xs">
+                {{ user.email }}
+              </span>
             </div>
-            <ChevronsUpDown class="ml-auto size-4" />
+            <IconDotsVertical class="ml-auto size-4" />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          class="w-[--reka-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+          class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
           :side="isMobile ? 'bottom' : 'right'"
-          align="end"
           :side-offset="4"
+          align="end"
         >
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -86,37 +80,32 @@ const { isMobile } = useSidebar()
                 </AvatarFallback>
               </Avatar>
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">{{ user.name }}</span>
-                <span class="truncate text-xs">{{ user.email }}</span>
+                <span class="truncate font-medium">{{ user.name }}</span>
+                <span class="text-muted-foreground truncate text-xs">
+                  {{ user.email }}
+                </span>
               </div>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
-              <Sparkles />
-              <router-link to="/service/upgrade">Upgrade to Pro</router-link>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem @click="$router.push('/service/profile')">
-              <BadgeCheck />
+              <IconUserCircle />
               Account
             </DropdownMenuItem>
-            <DropdownMenuItem @click="$router.push('/service/billing')">
-              <CreditCard />
+            <DropdownMenuItem>
+              <IconCreditCard />
               Billing
             </DropdownMenuItem>
-            <DropdownMenuItem @click="$router.push('/service/notifications')">
-              <Bell />
+            <DropdownMenuItem>
+              <IconNotification />
               Notifications
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <LogOut />
-            <span @click="authStore.logout">Log out</span>
+            <IconLogout />
+            Log out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

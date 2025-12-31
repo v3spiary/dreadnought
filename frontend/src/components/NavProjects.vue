@@ -3,7 +3,6 @@ import type { LucideIcon } from "lucide-vue-next"
 import {
   Folder,
   Forward,
-
   MoreHorizontal,
   Trash2,
 } from "lucide-vue-next"
@@ -76,8 +75,8 @@ const { isMobile } = useSidebar()
         </DropdownMenu>
       </SidebarMenuItem>
       <SidebarMenuItem>
-        <SidebarMenuButton>
-          <MoreHorizontal />
+        <SidebarMenuButton class="text-sidebar-foreground/70">
+          <MoreHorizontal class="text-sidebar-foreground/70" />
           <span>More</span>
         </SidebarMenuButton>
       </SidebarMenuItem>

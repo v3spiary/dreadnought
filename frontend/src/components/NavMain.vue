@@ -1,70 +1,57 @@
 <script setup lang="ts">
-import type { LucideIcon } from "lucide-vue-next"
-import { ChevronRight } from "lucide-vue-next"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+import type { Component } from "vue"
+import { IconCirclePlusFilled, IconMail } from "@tabler/icons-vue"
+
+import { Button } from '@/components/ui/button'
 import {
   SidebarGroup,
-  SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 
+interface NavItem {
+  title: string
+  url: string
+  icon?: Component
+}
+
 defineProps<{
-  items: {
-    title: string
-    url: string
-    icon: LucideIcon
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
+  items: NavItem[]
 }>()
 </script>
 
 <template>
   <SidebarGroup>
-    <SidebarGroupLabel>Chat</SidebarGroupLabel>
-    <SidebarMenu>
-      <Collapsible v-for="item in items" :key="item.title" as-child :default-open="item.isActive">
-        <SidebarMenuItem>
-          <SidebarMenuButton as-child :tooltip="item.title">
-            <a :href="item.url">
-              <component :is="item.icon" />
-              <span>{{ item.title }}</span>
-            </a>
+    <SidebarGroupContent class="flex flex-col gap-2">
+      <SidebarMenu>
+        <SidebarMenuItem class="flex items-center gap-2">
+          <SidebarMenuButton
+            tooltip="Quick Create"
+            class="bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear"
+          >
+            <IconCirclePlusFilled />
+            <span>Quick Create</span>
           </SidebarMenuButton>
-          <template v-if="item.items?.length">
-            <CollapsibleTrigger as-child>
-              <SidebarMenuAction class="data-[state=open]:rotate-90">
-                <ChevronRight />
-                <span class="sr-only">Toggle</span>
-              </SidebarMenuAction>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <SidebarMenuSub>
-                <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
-                  <SidebarMenuSubButton as-child>
-                    <a :href="subItem.url">
-                      <span>{{ subItem.title }}</span>
-                    </a>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              </SidebarMenuSub>
-            </CollapsibleContent>
-          </template>
+          <Button
+            size="icon"
+            class="size-8 group-data-[collapsible=icon]:opacity-0"
+            variant="outline"
+          >
+            <IconMail />
+            <span class="sr-only">Inbox</span>
+          </Button>
         </SidebarMenuItem>
-      </Collapsible>
-    </SidebarMenu>
+      </SidebarMenu>
+      <SidebarMenu>
+        <SidebarMenuItem v-for="item in items" :key="item.title">
+          <SidebarMenuButton :tooltip="item.title">
+            <component :is="item.icon" v-if="item.icon" />
+            <span>{{ item.title }}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroupContent>
   </SidebarGroup>
 </template>
