@@ -1,19 +1,21 @@
 import json
+import logging
 import threading
 import urllib.request
-import logging
-from channels.generic.websocket import AsyncWebsocketConsumer
+
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
+
 def _generate_ai_sync(chat_id, prompt):
     """Синхронная генерация в отдельном потоке."""
     try:
-        from chatbot.models import Chat, Message
         from asgiref.sync import async_to_sync
         from channels.layers import get_channel_layer
+        from chatbot.models import Chat, Message
 
         channel_layer = get_channel_layer()
         group_name = f"chat_{chat_id}"
@@ -22,12 +24,9 @@ def _generate_ai_sync(chat_id, prompt):
         try:
             req = urllib.request.Request(
                 "http://ollama:11434/api/generate",
-                data=json.dumps({
-                    "model": "",
-                    "system": "",
-                    "prompt": f"{prompt}",
-                    "stream": True
-                }).encode(),
+                data=json.dumps(
+                    {"model": "", "system": "", "prompt": f"{prompt}", "stream": True}
+                ).encode(),
                 headers={"Content-Type": "application/json"},
                 method="POST",
             )
@@ -75,9 +74,11 @@ def _generate_ai_sync(chat_id, prompt):
         )
         logger.error(f"[AI Thread] ERROR: {e}", exc_info=True)
 
+
 class ServiceChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         from chatbot.models import Chat, Message
+
         self.user = self.scope["user"]
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
 
@@ -98,7 +99,9 @@ class ServiceChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         if hasattr(self, "room_group_name"):
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
 
     async def receive(self, text_data):
         data = json.loads(text_data)
@@ -121,35 +124,46 @@ class ServiceChatConsumer(AsyncWebsocketConsumer):
 
         # 3. Запускаем AI в отдельном потоке (не блокирует WS)
         threading.Thread(
-            target=_generate_ai_sync,
-            args=(self.chat_id, content),
-            daemon=True
+            target=_generate_ai_sync, args=(self.chat_id, content), daemon=True
         ).start()
 
     # --- Обработчики ---
     async def user_message(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "user_message",
-            "message_id": event["message_id"],
-            "content": event["content"],
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "user_message",
+                    "message_id": event["message_id"],
+                    "content": event["content"],
+                }
+            )
+        )
 
     async def ai_chunk(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "ai_chunk",
-            "chunk": event["chunk"],
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "ai_chunk",
+                    "chunk": event["chunk"],
+                }
+            )
+        )
 
     async def ai_complete(self, event):
-        await self.send(text_data=json.dumps({
-            "type": "ai_complete",
-            " race_id": event["message_id"],
-        }))
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "type": "ai_complete",
+                    " race_id": event["message_id"],
+                }
+            )
+        )
 
     # --- DB ---
     @database_sync_to_async
     def _save_user_message(self, content):
         from chatbot.models import Chat, Message
+
         with transaction.atomic():
             chat = Chat.objects.select_for_update().get(id=self.chat_id)
             return Message.objects.create(

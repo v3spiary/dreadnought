@@ -1,20 +1,22 @@
 """Views приложения чат-бота (описываем логику)."""
 
+import json
+import logging
+import random
+import threading
+import urllib.request
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from chatbot.models import Chat, Message
+from chatbot.serializers import ChatSerializer, MessageSerializer
+from django.utils.text import slugify
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.utils.text import slugify
-import random
-from chatbot.models import Chat, Message
-from chatbot.serializers import ChatSerializer, MessageSerializer
-#from .tasks import generate_ai_response
 
-import threading
-import urllib.request
-import json
-import logging
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
+# from .tasks import generate_ai_response
+
 
 class ChatViewSet(viewsets.ModelViewSet):
     """Класс, описывающий логику API для чатов."""
@@ -23,7 +25,9 @@ class ChatViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Пользователь видит только свои, не удаленные чаты."""
-        return Chat.objects.filter(owner=self.request.user, deleted=False).order_by("-created_at")
+        return Chat.objects.filter(owner=self.request.user, deleted=False).order_by(
+            "-created_at"
+        )
 
     def perform_create(self, serializer):
         """При создании чата автоматически устанавливается владелец."""
@@ -33,9 +37,13 @@ class ChatViewSet(viewsets.ModelViewSet):
     def start_chat(self, request):
         try:
             from .consumers import _generate_ai_sync
+
             message = request.data.get("message", "").strip()
             if not message:
-                return Response({"error": "Сообщение обязательно"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Сообщение обязательно"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
             # СОЗДАЁМ ЧАТ И СООБЩЕНИЕ
             chat = Chat.objects.create(owner=request.user, name=message[:50])
@@ -48,16 +56,16 @@ class ChatViewSet(viewsets.ModelViewSet):
 
             # ЗАПУСКАЕМ AI В ПОТОКЕ
             threading.Thread(
-                target=_generate_ai_sync,
-                args=(str(chat.id), message),
-                daemon=True
+                target=_generate_ai_sync, args=(str(chat.id), message), daemon=True
             ).start()
 
             return Response({"chat_id": str(chat.id)}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             logger.error(f"START CHAT ERROR: {e}", exc_info=True)
-            return Response({"chat_id": str(chat.id)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"chat_id": str(chat.id)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @action(detail=True, methods=["get"])
     def messages(self, request, pk=None):

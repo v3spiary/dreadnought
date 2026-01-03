@@ -1,11 +1,12 @@
 # chatbot/tasks.py
-from celery import shared_task
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 import json
-import urllib.request
 import logging
+import urllib.request
 from uuid import UUID
+
+from asgiref.sync import async_to_sync
+from celery import shared_task
+from channels.layers import get_channel_layer
 
 logger = logging.getLogger(__name__)
 

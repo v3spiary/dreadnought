@@ -1,23 +1,22 @@
 """Конфигурация всего проекта."""
 
-import os
 import logging
+import os
 from datetime import timedelta
 from os import environ
 from pathlib import Path
 
 from celery.schedules import crontab
 from django.core.management.utils import get_random_secret_key
-
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.celery import CeleryInstrumentor
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.django import DjangoInstrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
-from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
-from opentelemetry.instrumentation.celery import CeleryInstrumentor
-from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -107,9 +106,13 @@ MIDDLEWARE = [
 
 # Настройки OpenTelemetry
 OTEL_ENABLED = environ.get("OTEL_ENABLED", "false").lower() == "true"
-OTEL_EXPORTER_OTLP_ENDPOINT = environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4317")
+OTEL_EXPORTER_OTLP_ENDPOINT = environ.get(
+    "OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4317"
+)
 OTEL_SERVICE_NAME = environ.get("OTEL_SERVICE_NAME", "hismind-api")
-OTEL_PYTHON_LOG_CORRELATION = environ.get("OTEL_PYTHON_LOG_CORRELATION", "true").lower() == "true"
+OTEL_PYTHON_LOG_CORRELATION = (
+    environ.get("OTEL_PYTHON_LOG_CORRELATION", "true").lower() == "true"
+)
 
 # Настройка провайдера трассировки
 trace.set_tracer_provider(TracerProvider())
@@ -129,11 +132,32 @@ DjangoInstrumentor().instrument()
 RedisInstrumentor().instrument()
 Psycopg2Instrumentor().instrument()
 CeleryInstrumentor().instrument()
-LoggingInstrumentor().instrument()
+LoggingInstrumentor().instrument(
+    set_logging_format=True,
+    log_level=logging.INFO,
+)
 
 # Настройки Prometheus
 PROMETHEUS_EXPORT_MIGRATIONS = False  # Отключаем экспорт миграций
-PROMETHEUS_LATENCY_BUCKETS = (0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0, 25.0, 50.0, 75.0, float("inf"))
+PROMETHEUS_LATENCY_BUCKETS = (
+    0.01,
+    0.025,
+    0.05,
+    0.075,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    2.5,
+    5.0,
+    7.5,
+    10.0,
+    25.0,
+    50.0,
+    75.0,
+    float("inf"),
+)
 
 CHANNEL_LAYERS = {
     "default": {
@@ -152,10 +176,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # Важно для корректного логирования
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
 
 # Prometheus для Celery
-CELERY_WORKER_PROMETHEUS_PORTS = environ.get("CELERY_WORKER_PROMETHEUS_PORTS", "8880,8881").split(",")
+CELERY_WORKER_PROMETHEUS_PORTS = environ.get(
+    "CELERY_WORKER_PROMETHEUS_PORTS", "8880,8881"
+).split(",")
 
 # Пример периодических задач
 CELERY_BEAT_SCHEDULE = {
@@ -251,7 +277,7 @@ DJOSER = {
     "SEND_ACTIVATION_EMAIL": False,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 EMAIL_HOST = environ.get("EMAIL_HOST")
 
@@ -268,7 +294,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        'DIRS': [BASE_DIR / 'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -289,13 +315,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Prometheus для базы данных
 DATABASES = {
-    'default': {
-        'ENGINE': 'django_prometheus.db.backends.postgresql',
-        'NAME': environ.get("POSTGRES_DB"),
-        'USER': environ.get("POSTGRES_USER"),
-        'PASSWORD': environ.get("POSTGRES_PASSWORD"),
-        'HOST': environ.get("DB_HOST"),
-        'PORT': environ.get("DB_PORT", "5432"),
+    "default": {
+        "ENGINE": "django_prometheus.db.backends.postgresql",
+        "NAME": environ.get("POSTGRES_DB"),
+        "USER": environ.get("POSTGRES_USER"),
+        "PASSWORD": environ.get("POSTGRES_PASSWORD"),
+        "HOST": environ.get("DB_HOST"),
+        "PORT": environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -310,111 +336,109 @@ except PermissionError:
 
 # Формат логов с учетом OpenTelemetry
 if OTEL_ENABLED and OTEL_PYTHON_LOG_CORRELATION:
-    LOG_FORMAT = '%(asctime)s [%(levelname)s] trace_id=%(otelTraceID)s span_id=%(otelSpanID)s resource.service.name=%(otelServiceName)s %(name)s: %(message)s'
+    LOG_FORMAT = "%(asctime)s [%(levelname)s] trace_id=%(otelTraceID)s span_id=%(otelSpanID)s resource.service.name=%(otelServiceName)s %(name)s: %(message)s"
 else:
-    LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+    LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': LOG_FORMAT,
-            'datefmt': '%Y-%m-%d %H:%M:%S',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": LOG_FORMAT,
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'simple': {
-            'format': '[%(levelname)s] %(message)s'
+        "simple": {"format": "[%(levelname)s] %(message)s"},
+    },
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
         },
     },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+        "file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "django.log",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
-    },
-    'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+        "error_file": {
+            "level": "ERROR",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "django_error.log",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'django.log',
-            'maxBytes': 10 * 1024 * 1024,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
+        "celery_file": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": LOG_DIR / "celery.log",
+            "maxBytes": 10 * 1024 * 1024,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
-        'error_file': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'django_error.log',
-            'maxBytes': 10 * 1024 * 1024,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-        'celery_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'celery.log',
-            'maxBytes': 10 * 1024 * 1024,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'filters': ['require_debug_false'],
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+            "filters": ["require_debug_false"],
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file', 'error_file', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file", "error_file", "mail_admins"],
+            "level": "INFO",
+            "propagate": True,
         },
-        'django.request': {
-            'handlers': ['error_file', 'mail_admins'],
-            'level': 'INFO',
-            'propagate': False,
+        "django.request": {
+            "handlers": ["error_file", "mail_admins"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'django.server': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "django.server": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'celery': {
-            'handlers': ['console', 'celery_file'],
-            'level': 'INFO',
-            'propagate': True,
+        "celery": {
+            "handlers": ["console", "celery_file"],
+            "level": "INFO",
+            "propagate": True,
         },
-        'hismind': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "hismind": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'chatbot': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "chatbot": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'auth_app': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "auth_app": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'diary': {
-            'handlers': ['console', 'file', 'error_file'],
-            'level': 'INFO',
-            'propagate': False,
+        "diary": {
+            "handlers": ["console", "file", "error_file"],
+            "level": "INFO",
+            "propagate": False,
         },
-        'opentelemetry': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
+        "opentelemetry": {
+            "handlers": ["console", "file"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
@@ -466,5 +490,7 @@ STATIC_ROOT = STATIC_DIR
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Настройки для экспорта метрик Prometheus
-PROMETHEUS_PUSH_GATEWAY = environ.get("PROMETHEUS_PUSH_GATEWAY", "http://prometheus:9091")
+PROMETHEUS_PUSH_GATEWAY = environ.get(
+    "PROMETHEUS_PUSH_GATEWAY", "http://prometheus:9091"
+)
 PROMETHEUS_PUSH_INTERVAL = int(environ.get("PROMETHEUS_PUSH_INTERVAL", "30"))
