@@ -1,0 +1,33 @@
+# docker/apparmor/deadwood-profile
+#include <tunables/global>
+
+profile deadwood-docker flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+  #include <abstractions/python>
+  #include <abstractions/nameservice>
+  
+  # Разрешаем доступ к файлам приложения
+  /app/** rw,
+  /app/*.py r,
+  /var/log/django/** rw,
+  /tmp/** rw,
+  
+  # Сеть
+  network inet tcp,
+  network inet udp,
+  
+  # БД
+  /run/postgresql/.s.PGSQL.* rw,
+  
+  # Запрещаем опасные операции
+  deny @{PROC}/** w,   # нельзя писать в /proc
+  deny /bin/** w,      # нельзя менять бинарники
+  deny /sbin/** w,
+  deny /usr/bin/** w,
+  deny /usr/sbin/** w,
+  
+  # Разрешаем только необходимые capability
+  capability setuid,
+  capability setgid,
+  capability net_bind_service,
+}

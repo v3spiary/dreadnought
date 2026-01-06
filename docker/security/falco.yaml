@@ -1,0 +1,24 @@
+- rule: Deadwood Process Execution
+  desc: Detect unexpected process execution in container
+  condition: >
+    container.id != host and
+    proc.name in (sh, bash, python, python3) and
+    not proc.args in ("python", "manage.py", "gunicorn", "celery")
+  output: >
+    Unexpected process in deadwood container (user=%user.name
+    command=%proc.cmdline container_id=%container.id container_name=%container.name)
+  priority: WARNING
+  tags: [deadwood, process]
+
+- rule: Deadwood Network Activity
+  desc: Detect unexpected network connections
+  condition: >
+    container.id != host and
+    container.name startswith "deadwood_" and
+    evt.type=connect and
+    not fd.sip.name in (postgres, redis, tempo, prometheus)
+  output: >
+    Unexpected network connection from deadwood container
+    (command=%proc.cmdline connection=%fd.name container_id=%container.id)
+  priority: ERROR
+  tags: [deadwood, network]
