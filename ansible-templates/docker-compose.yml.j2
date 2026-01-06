@@ -57,7 +57,7 @@ services:
     image: cr.selcloud.ru/hm-startup/hm-frontend:rolling
     cpus: '0.5'
     mem_limit: '512m'
-    container_name: hismind-frontend
+    container_name: deadwood-frontend
     ports:
       - "80:80"
     depends_on:
@@ -79,14 +79,14 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DJANGO_ENV=settings
-      - API_HOST=his-mind.ru
+      - API_HOST=deadwood.ru
       - API_PORT=8000
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
       - OTEL_TRACES_EXPORTER=otlp
       - OTEL_METRICS_EXPORTER=none
       - OTEL_LOGS_EXPORTER=none
-      - OTEL_SERVICE_NAME=his-mind
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=his-mind,service.namespace=sre
+      - OTEL_SERVICE_NAME=deadwood
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
     depends_on:
       - db
       - redis
@@ -114,8 +114,8 @@ services:
   #    - OTEL_TRACES_EXPORTER=otlp
   #    - OTEL_METRICS_EXPORTER=none
   #    - OTEL_LOGS_EXPORTER=none
-  #    - OTEL_SERVICE_NAME=his-mind
-  #    - OTEL_RESOURCE_ATTRIBUTES=service.name=his-mind,service.namespace=dfir
+  #    - OTEL_SERVICE_NAME=deadwood
+  #    - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=dfir
   #  depends_on:
   #    - db
   #    - redis
@@ -124,7 +124,7 @@ services:
   #    - hm_net
 
   #beat:
-  #  image: hismind-beat:latest
+  #  image: deadwood-beat:latest
   #  cpus: '1.0'
   #  mem_limit: '1g'
   #  environment:
@@ -141,8 +141,8 @@ services:
   #    - OTEL_TRACES_EXPORTER=otlp
   #    - OTEL_METRICS_EXPORTER=none
   #    - OTEL_LOGS_EXPORTER=none
-  #    - OTEL_SERVICE_NAME=his-mind
-  #    - OTEL_RESOURCE_ATTRIBUTES=service.name=his-mind,service.namespace=dfir
+  #    - OTEL_SERVICE_NAME=deadwood
+  #    - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=dfir
   #  depends_on:
   #    - db
   #    - redis

@@ -1,4 +1,22 @@
-# STAGE 1: SETUP ENV
+# STAGE 1: CHECK & BUILD BUNDLE
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ARG VITE_WS_BASE_URL
+ENV VITE_WS_BASE_URL=$VITE_WS_BASE_URL
+
+COPY frontend/package*.json ./
+
+RUN npm ci
+
+COPY frontend/ .
+
+RUN npm run build
+
+# STAGE 2: SETUP PYTHON ENV
 FROM python:3.11-slim AS base
 
 ENV PYTHONUNBUFFERED=1
@@ -29,14 +47,12 @@ RUN pip install --upgrade pip
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+COPY backend/requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Создаем группу и пользователя раньше
 RUN groupadd -g 1000 deadwood && useradd -u 1000 -g deadwood -m deadwood
 
-# Создаем директорию для логов с правильными правами
 RUN mkdir -p /var/log/django && \
     touch /var/log/django/django.log && \
     touch /var/log/django/django_error.log && \
@@ -44,37 +60,39 @@ RUN mkdir -p /var/log/django && \
     chown -R deadwood:deadwood /var/log/django && \
     chmod 755 /var/log/django
 
-# STAGE 2: DRF REST API
+# STAGE 3: DRF REST API
 FROM base AS server
 
-COPY entrypoint.sh .
+RUN mkdir -p /home/app/web/frontend_dist
+
+COPY --from=frontend /app/dist /home/app/web/frontend_dist
+
+COPY backend/entrypoint.sh .
 
 RUN chmod +x entrypoint.sh
 
-COPY . /app/
+COPY backend/ /app/
 
 EXPOSE 8000
 
-# Изменяем владельца приложения
 RUN chown -R deadwood:deadwood /app
 
 USER deadwood
 
 ENTRYPOINT ["sh", "./entrypoint.sh"]
 
-# STAGE 3: CELERY WORKER
+# STAGE 4: CELERY WORKER
 FROM base AS worker
 
-COPY . /app/
+COPY backend/ /app/
 
-# Изменяем владельца приложения
 RUN chown -R deadwood:deadwood /app
 
 USER deadwood
 
 ENTRYPOINT celery -A config worker --loglevel=info --concurrency=4
 
-# STAGE 4: CELERY BEAT
+# STAGE 5: CELERY BEAT
 FROM worker AS beat 
 
 ENTRYPOINT celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler

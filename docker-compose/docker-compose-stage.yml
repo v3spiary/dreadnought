@@ -1,23 +1,141 @@
 services:
-  # waf:
-  #   image: owasp/modsecurity-crs:4.21.0-nginx-alpine-202512071012
-  #   container_name: waf-proxy
+  waf:
+    image: owasp/modsecurity-crs:4.21.0-nginx-alpine-202512071012
+    container_name: waf-proxy
+    ports:
+      - "80:8080"
+    environment:
+      - BACKEND=http://deadwood:8000
+      - UPSTREAM_PORT=80
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+      - MODSECURITY_RULE_ENGINE=On
+      - PARANOIA=1
+    volumes:
+      - ../waf/custom-rules:/etc/nginx/custom-rules:ro
+    networks:
+      - hm_net
+    depends_on:
+      frontend:
+        condition: deadwood
+    restart: always
+
+  deadwood:
+    build:
+      context: ../docker
+      dockerfile: Dockerfile
+      target: server
+      args:
+        - VITE_API_BASE_URL=http://localhost/api/v1/
+        - VITE_WS_BASE_URL=ws://localhost/ws/
+    image: deadwood-backend:latest
+    cpus: '2.0'
+    mem_limit: '2g'
+    expose:
+      - "8000"
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DJANGO_ENV=settings
+      - API_HOST=127.0.0.1
+      - API_PORT=80
+      - OTEL_PYTHON_LOG_LEVEL=DEBUG
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_SERVICE_NAME=deadwood
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
+    depends_on:
+      - db
+      - redis
+      - tempo
+    volumes:
+      - global_logs:/var/log/django:rw
+    restart: always
+    networks:
+      - hm_net
+
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: worker
+    image: deadwood-worker:latest
+    cpus: '1.0'
+    mem_limit: '1g'
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DJANGO_ENV=settings
+      - API_HOST=127.0.0.1
+      - API_PORT=80
+      - OTEL_PYTHON_LOG_LEVEL=DEBUG
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_SERVICE_NAME=deadwood
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - global_logs:/var/log/django:ro
+    restart: always
+    networks:
+      - hm_net
+
+  beat:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: beat
+    image: deadwood-beat:latest
+    cpus: '1.0'
+    mem_limit: '1g'
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DJANGO_ENV=settings
+      - API_HOST=127.0.0.1
+      - API_PORT=80
+      - OTEL_PYTHON_LOG_LEVEL=DEBUG
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
+      - OTEL_LOGS_EXPORTER=none
+      - OTEL_SERVICE_NAME=deadwood
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
+    depends_on:
+      - db
+      - redis
+      - backend
+      - worker
+    volumes:
+      - global_logs:/var/log/django:ro
+    restart: always
+    networks:
+      - hm_net
+
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
   #   ports:
-  #     - "80:8080"
-  #   environment:
-  #     - BACKEND=http://frontend:80
-  #     - UPSTREAM_PORT=80
-  #     - NGINX_ENTRYPOINT_QUIET_LOGS=1
-  #     - MODSECURITY_RULE_ENGINE=On
-  #     - PARANOIA=1
+  #     - "11434:11434"
   #   volumes:
-  #     - ../waf/custom-rules:/etc/nginx/custom-rules:ro
+  #     - ollama_data:/root/.ollama
+  #   restart: always
   #   networks:
   #     - hm_net
-  #   depends_on:
-  #     frontend:
-  #       condition: service_healthy
-  #   restart: unless-stopped
 
   db:
     image: postgres:17-alpine
@@ -73,141 +191,6 @@ services:
     restart: always
     networks:
       - hm_net
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_BASE_URL=http://localhost/api/v1/
-        - VITE_WS_BASE_URL=ws://localhost/ws/
-    image: deadwood-frontend:latest
-    cpus: '0.5'
-    mem_limit: '512m'
-    container_name: deadwood-frontend
-    expose:
-      - "80"
-    depends_on:
-      - backend
-    restart: always
-    networks:
-      - hm_net
-
-  backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-      target: server
-    image: deadwood-backend:latest
-    cpus: '2.0'
-    mem_limit: '2g'
-    expose:
-      - "8000"
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DJANGO_ENV=settings
-      - API_HOST=127.0.0.1
-      - API_PORT=80
-      - OTEL_PYTHON_LOG_LEVEL=DEBUG
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
-      - OTEL_SERVICE_NAME=deadwood
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
-    depends_on:
-      - db
-      - redis
-      - tempo
-    volumes:
-      - global_logs:/var/log/django:rw
-    restart: always
-    networks:
-      - hm_net
-
-  # worker:
-  #   build:
-  #     context: ../backend
-  #     dockerfile: Dockerfile
-  #     target: worker
-  #   image: deadwood-worker:latest
-  #   cpus: '1.0'
-  #   mem_limit: '1g'
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - DB_HOST=db
-  #     - DB_PORT=5432
-  #     - DJANGO_ENV=settings
-  #     - API_HOST=127.0.0.1
-  #     - API_PORT=80
-  #     - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
-  #     - OTEL_TRACES_EXPORTER=otlp
-  #     - OTEL_METRICS_EXPORTER=none
-  #     - OTEL_LOGS_EXPORTER=none
-  #     - OTEL_SERVICE_NAME=deadwood
-  #     - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=dfir
-  #   depends_on:
-  #     - db
-  #     - redis
-  #   volumes:
-  #     - global_logs:/var/log/django:ro
-  #   restart: always
-  #   networks:
-  #     - hm_net
-
-  # beat:
-  #   build:
-  #     context: ../backend
-  #     dockerfile: Dockerfile
-  #     target: beat
-  #   image: deadwood-beat:latest
-  #   cpus: '1.0'
-  #   mem_limit: '1g'
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - DB_HOST=db
-  #     - DB_PORT=5432
-  #     - DJANGO_ENV=settings
-  #     - API_HOST=127.0.0.1
-  #     - API_PORT=80
-  #     - CELERY_BROKER_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
-  #     - OTEL_ENABLED=true
-  #     - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4318
-  #     - OTEL_TRACES_EXPORTER=otlp
-  #     - OTEL_METRICS_EXPORTER=none
-  #     - OTEL_LOGS_EXPORTER=none
-  #     - OTEL_SERVICE_NAME=deadwood
-  #     - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=dfir
-  #   depends_on:
-  #     - db
-  #     - redis
-  #     - backend
-  #     - worker
-  #   volumes:
-  #     - global_logs:/var/log/django:ro
-  #   restart: always
-  #   networks:
-  #     - hm_net
-
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: ollama
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   restart: always
-  #   networks:
-  #     - hm_net
 
   prometheus:
     image: prom/prometheus:latest

@@ -15,17 +15,6 @@ scrape_configs:
           - localhost
         labels:
           job: django
-          service: his-mind-service
+          service: deadwood-service
           env: lab
           __path__: /var/log/django/*.log
-
-  - job_name: modsecurity-logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          job: modsecurity
-          service: waf
-          env: lab
-          log_type: audit
-          __path__: /var/log/waf/*.log

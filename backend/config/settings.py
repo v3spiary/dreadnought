@@ -109,7 +109,7 @@ OTEL_ENABLED = environ.get("OTEL_ENABLED", "false").lower() == "true"
 OTEL_EXPORTER_OTLP_ENDPOINT = environ.get(
     "OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4317"
 )
-OTEL_SERVICE_NAME = environ.get("OTEL_SERVICE_NAME", "hismind-api")
+OTEL_SERVICE_NAME = environ.get("OTEL_SERVICE_NAME", "deadwood-api")
 OTEL_PYTHON_LOG_CORRELATION = (
     environ.get("OTEL_PYTHON_LOG_CORRELATION", "true").lower() == "true"
 )
@@ -272,7 +272,7 @@ SIMPLE_JWT = {
 }
 
 DJOSER = {
-    "PASSWORD_RESET_CONFIRM_URL": "https://his-mind.ru/auth/reset-password-confirm/confirm/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "https://deadwood.ru/auth/reset-password-confirm/confirm/{uid}/{token}",
     "ACTIVATION_URL": "#/activate/{uid}/{token}",
     "SEND_ACTIVATION_EMAIL": False,
 }
@@ -415,7 +415,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
-        "hismind": {
+        "deadwood": {
             "handlers": ["console", "file", "error_file"],
             "level": "INFO",
             "propagate": False,

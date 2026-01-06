@@ -1,4 +1,4 @@
-# STAGE 0: CHECK & BUILD BUNDLE
+# STAGE 1: CHECK & BUILD BUNDLE
 FROM node:20-alpine AS builder
 
 WORKDIR /app
@@ -20,7 +20,7 @@ COPY . .
 
 RUN npm run build
 
-# STAGE 1: RUN BUNDLE
+# STAGE 2: RUN BUNDLE
 FROM nginx:alpine AS runner
 
 COPY --from=builder /app/dist /usr/share/nginx/html
