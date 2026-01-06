@@ -1,8 +1,8 @@
 """Конфигурация сборки логов."""
 
+import json
 import logging
 import os
-import json
 from datetime import timedelta
 from os import environ
 from pathlib import Path
@@ -19,7 +19,7 @@ LOGGING = {
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
         "verbose": {
-            "format": '''
+            "format": """
                 %(asctime)s 
                 [%(levelname)s] 
                 trace_id=%(otelTraceID)s 
@@ -33,39 +33,41 @@ LOGGING = {
                 (%(filename).%(funcName)s(%(lineno)d) 
                 - 
                 %(message)s
-                ''',
+                """,
             "style": "%",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'json': {
-            '()': 'pythonjsonlogger.jsonlogger.JsonFormatter',
-            'format': json.dumps({
-                'asctime': '%(asctime)s',
-                'name': '%(name)s',
-                'levelname': '%(levelname)s',
-                'message': '%(message)s',
-                'module': '%(module)s',
-                'funcName': '%(funcName)s',
-                'lineno': '%(lineno)d',
-                'process': '%(process)d',
-                'thread': '%(thread)d',
-                'otelTraceID': '%(otelTraceID)s',
-                'otelSpanID': '%(otelSpanID)s',
-                'otelTraceSampled': '%(otelTraceSampled)s',
-                'otelServiceName': '%(otelServiceName)s',
-            }),
-            'json_ensure_ascii': False,
-            'rename_fields': {
-                'asctime': 'timestamp',
-                'levelname': 'level',
-                'name': 'logger',
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": json.dumps(
+                {
+                    "asctime": "%(asctime)s",
+                    "name": "%(name)s",
+                    "levelname": "%(levelname)s",
+                    "message": "%(message)s",
+                    "module": "%(module)s",
+                    "funcName": "%(funcName)s",
+                    "lineno": "%(lineno)d",
+                    "process": "%(process)d",
+                    "thread": "%(thread)d",
+                    "otelTraceID": "%(otelTraceID)s",
+                    "otelSpanID": "%(otelSpanID)s",
+                    "otelTraceSampled": "%(otelTraceSampled)s",
+                    "otelServiceName": "%(otelServiceName)s",
+                }
+            ),
+            "json_ensure_ascii": False,
+            "rename_fields": {
+                "asctime": "timestamp",
+                "levelname": "level",
+                "name": "logger",
             },
-        }
+        },
     },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'json',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
         },
     },
     "loggers": {
