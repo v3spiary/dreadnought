@@ -1,14 +1,8 @@
 """Конфигурация сборки трейсов."""
 
-import json
 import logging
-import os
-from datetime import timedelta
 from os import environ
-from pathlib import Path
 
-from celery.schedules import crontab
-from django.core.management.utils import get_random_secret_key
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.celery import CeleryInstrumentor

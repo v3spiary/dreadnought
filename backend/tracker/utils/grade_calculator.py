@@ -1,7 +1,4 @@
-from datetime import date, timedelta
 from decimal import Decimal
-
-from django.db.models import Q
 
 from .models import DailyMetric, ForceMajeureEvent, UserProfile
 

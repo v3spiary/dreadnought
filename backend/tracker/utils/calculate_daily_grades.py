@@ -2,7 +2,8 @@ from datetime import date, timedelta
 
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
-from tracker.models import DailyGrade, DailyMetric
+
+from tracker.models import DailyGrade
 from tracker.utils.grade_calculator import GradeCalculator
 
 

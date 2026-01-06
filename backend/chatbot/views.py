@@ -1,21 +1,19 @@
 """Views приложения чат-бота (описываем логику)."""
 
-import json
 import logging
-import random
 import threading
-import urllib.request
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-from chatbot.models import Chat, Message
-from chatbot.serializers import ChatSerializer, MessageSerializer
-from django.utils.text import slugify
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from chatbot.models import Chat, Message
+from chatbot.serializers import ChatSerializer, MessageSerializer
+
 # from .tasks import generate_ai_response
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 
 class ChatViewSet(viewsets.ModelViewSet):

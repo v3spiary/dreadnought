@@ -1,7 +1,8 @@
-from datetime import date, timedelta
+from datetime import date
 
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
+
 from tracker.models import FlexibleGoal, UserProfile
 
 

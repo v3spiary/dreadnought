@@ -1,4 +1,3 @@
-# docker/apparmor/deadwood-profile
 #include <tunables/global>
 
 profile deadwood-docker flags=(attach_disconnected,mediate_deleted) {

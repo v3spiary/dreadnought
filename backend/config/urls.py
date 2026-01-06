@@ -3,7 +3,6 @@
 import os
 
 from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import Http404, HttpResponse
 from django.urls import include, path, re_path

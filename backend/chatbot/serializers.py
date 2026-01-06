@@ -1,7 +1,8 @@
 """Сериализаторы для приложения чатбота."""
 
-from chatbot.models import Chat, Message
 from rest_framework import serializers
+
+from chatbot.models import Chat, Message
 
 
 class MessageSerializer(serializers.ModelSerializer):

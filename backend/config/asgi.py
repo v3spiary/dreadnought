@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 
 import os
 
-import chatbot.routing
 from channels.routing import ProtocolTypeRouter, URLRouter
-from chatbot.middleware import JWTAuthMiddleware
 from django.core.asgi import get_asgi_application
+
+import chatbot.routing
+from chatbot.middleware import JWTAuthMiddleware
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 

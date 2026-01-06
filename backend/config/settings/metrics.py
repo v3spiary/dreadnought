@@ -1,23 +1,6 @@
 """Конфигурация сборки метрик."""
 
-import json
-import logging
-import os
-from datetime import timedelta
 from os import environ
-from pathlib import Path
-
-from celery.schedules import crontab
-from django.core.management.utils import get_random_secret_key
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.celery import CeleryInstrumentor
-from opentelemetry.instrumentation.django import DjangoInstrumentor
-from opentelemetry.instrumentation.logging import LoggingInstrumentor
-from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
-from opentelemetry.instrumentation.redis import RedisInstrumentor
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 # Настройки Prometheus
 PROMETHEUS_EXPORT_MIGRATIONS = False  # Отключаем экспорт миграций

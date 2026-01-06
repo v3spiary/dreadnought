@@ -1,11 +1,7 @@
 """Конфигурация сборки логов."""
 
 import json
-import logging
-import os
-from datetime import timedelta
 from os import environ
-from pathlib import Path
 
 LOG_LEVEL = environ.get("LOG_LEVEL", "INFO").upper()
 
@@ -20,18 +16,18 @@ LOGGING = {
         },
         "verbose": {
             "format": """
-                %(asctime)s 
-                [%(levelname)s] 
-                trace_id=%(otelTraceID)s 
-                span_id=%(otelSpanID)s 
-                resource.service.name=%(otelServiceName)s 
-                - 
-                [%(threadName)s] 
-                - 
-                %(name)s 
-                - 
-                (%(filename).%(funcName)s(%(lineno)d) 
-                - 
+                %(asctime)s
+                [%(levelname)s]
+                trace_id=%(otelTraceID)s
+                span_id=%(otelSpanID)s
+                resource.service.name=%(otelServiceName)s
+                -
+                [%(threadName)s]
+                -
+                %(name)s
+                -
+                (%(filename).%(funcName)s(%(lineno)d)
+                -
                 %(message)s
                 """,
             "style": "%",

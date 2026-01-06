@@ -15,7 +15,8 @@ def _generate_ai_sync(chat_id, prompt):
     try:
         from asgiref.sync import async_to_sync
         from channels.layers import get_channel_layer
-        from chatbot.models import Chat, Message
+
+        from chatbot.models import Message
 
         channel_layer = get_channel_layer()
         group_name = f"chat_{chat_id}"
@@ -77,7 +78,7 @@ def _generate_ai_sync(chat_id, prompt):
 
 class ServiceChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        from chatbot.models import Chat, Message
+        from chatbot.models import Chat
 
         self.user = self.scope["user"]
         self.chat_id = self.scope["url_route"]["kwargs"]["chat_id"]
