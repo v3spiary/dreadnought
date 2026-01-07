@@ -1,0 +1,22 @@
+# Development tools (ставится поверх requirements.txt)
+black
+flake8
+isort
+mypy
+pylint
+pylint-django
+django-stubs
+djangorestframework-stubs
+
+# Debugging & REPL
+ipdb
+ipython
+django-extensions
+
+# Testing
+pytest
+pytest-django
+pytest-cov
+factory-boy
+freezegun
+pre-commit

@@ -1,0 +1,132 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    // ОТЛАДКА DJANGO
+    {
+      "name": "Debug Django",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/backend",
+          "remoteRoot": "/app"
+        }
+      ],
+      "justMyCode": false,
+      "django": true,
+      "redirectOutput": true,
+      "logToFile": true,
+      "console": "integratedTerminal",
+      "presentation": {
+        "hidden": false,
+        "group": "django",
+        "order": 1
+      }
+    },
+    {
+      "name": "Debug Vue",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}/frontend",
+      "remoteRoot": "/app",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "presentation": {
+        "group": "frontend",
+        "order": 2
+      }
+    },
+    // ОТЛАДКА CELERY
+    {
+      "name": "Debug Celery Worker",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5680
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}/backend",
+          "remoteRoot": "/app"
+        }
+      ],
+      "justMyCode": false,
+      "presentation": {
+        "group": "celery",
+        "order": 1
+      }
+    },
+    //   // ОТЛАДКА ТЕСТОВ
+    //   {
+    //     "name": "Debug Django Tests",
+    //     "type": "debugpy",
+    //     "request": "launch",
+    //     "module": "pytest",
+    //     "args": [
+    //       "-v",
+    //       "-s",
+    //       "--capture=no",
+    //       "${file}" // текущий тестовый файл
+    //     ],
+    //     "cwd": "${workspaceFolder}/backend",
+    //     "env": {
+    //       "DJANGO_SETTINGS_MODULE": "config.settings.development"
+    //     },
+    //     "justMyCode": false,
+    //     "console": "integratedTerminal",
+    //     "presentation": {
+    //       "group": "tests",
+    //       "order": 1
+    //     }
+    //   },
+    //   // ОТЛАДКА ОДНОГО ТЕСТА
+    //   {
+    //     "name": "Debug Single Test",
+    //     "type": "debugpy",
+    //     "request": "launch",
+    //     "program": "${workspaceFolder}/backend/manage.py",
+    //     "args": [
+    //       "test",
+    //       "${relativeFile}"
+    //     ],
+    //     "cwd": "${workspaceFolder}/backend",
+    //     "django": true,
+    //     "justMyCode": false,
+    //     "console": "integratedTerminal"
+    //   }
+  ],
+  // СОСТАВНЫЕ КОНФИГУРАЦИИ
+  "compounds": [
+    {
+      "name": "Full Stack Debug",
+      "configurations": [
+        "Debug Django",
+        "Debug Vue"
+      ],
+      "stopAll": true,
+      "presentation": {
+        "group": "fullstack",
+        "order": 1
+      }
+    },
+    {
+      "name": "Backend + Celery",
+      "configurations": [
+        "Debug Django",
+        "Debug Celery Worker"
+      ],
+      "presentation": {
+        "group": "backend",
+        "order": 2
+      }
+    }
+  ]
+}

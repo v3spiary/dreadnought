@@ -1,8 +1,74 @@
+networks:
+  # Публичная сеть (только WAF)
+  public_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.1.0/24
+
+  # Фронтенд сеть (WAF + Backend + Monitoring UI)
+  frontend_net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.0.2.0/24
+
+  # Бэкенд сеть (Backend + Worker + Beat + DB + Redis + Telegram Bot)
+  backend_net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.0.3.0/24
+
+  # Мониторинг сеть (все сервисы мониторинга + WAF + Grafana)
+  monitoring_net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.0.4.0/24
+
+  # Базы данных сеть (только сервисы баз данных + их экспортеры)
+  database_net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.0.5.0/24
+
 services:
+  waf:
+    image: owasp/modsecurity-crs:4.21.0-nginx-alpine-202512071012
+    container_name: waf-proxy
+    ports:
+      - "80:8080"
+    environment:
+      - BACKEND=http://deadwood:8000
+      - UPSTREAM_PORT=80
+      - NGINX_ENTRYPOINT_QUIET_LOGS=1
+      - MODSECURITY_RULE_ENGINE=On
+      - PARANOIA=1
+    volumes:
+      - ../waf/custom-rules:/etc/nginx/custom-rules:ro
+    networks:
+      public_net:
+        aliases:
+          - waf
+      frontend_net:
+        aliases:
+          - waf
+      monitoring_net:
+        aliases:
+          - waf
+    restart: unless-stopped
+    # Может общаться с backend и имеет доступ к Grafana для мониторинга
+
   deadwood:
     build:
       context: ../
-      dockerfile: docker/prod/Dockerfile
+      dockerfile: docker/Dockerfile
       target: server
       args:
         - VITE_API_BASE_URL=http://localhost/api/v1/
@@ -10,8 +76,8 @@ services:
     image: deadwood-backend:latest
     cpus: '2.0'
     mem_limit: '2g'
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -36,12 +102,21 @@ services:
       - global_logs:/var/log/django:rw
     restart: always
     networks:
-      - deadwood_net
+      frontend_net:
+        aliases:
+          - deadwood
+      backend_net:
+        aliases:
+          - deadwood
+      monitoring_net:
+        aliases:
+          - deadwood
+    # Может общаться с WAF, БД, Redis, Telegram Bot и системой мониторинга
 
   worker:
     build:
-      context: ../
-      dockerfile: docker/prod/Dockerfile
+      context: ../backend
+      dockerfile: Dockerfile
       target: worker
     image: deadwood-worker:latest
     cpus: '1.0'
@@ -69,12 +144,18 @@ services:
       - global_logs:/var/log/django:ro
     restart: always
     networks:
-      - deadwood_net
+      backend_net:
+        aliases:
+          - worker
+      monitoring_net:
+        aliases:
+          - worker
+    # Может общаться только с БД, Redis, Telegram Bot и системой мониторинга
 
   beat:
     build:
-      context: ../
-      dockerfile: docker/prod/Dockerfile
+      context: ../backend
+      dockerfile: Dockerfile
       target: beat
     image: deadwood-beat:latest
     cpus: '1.0'
@@ -104,18 +185,38 @@ services:
       - global_logs:/var/log/django:ro
     restart: always
     networks:
-      - deadwood_net
+      backend_net:
+        aliases:
+          - beat
+      monitoring_net:
+        aliases:
+          - beat
+    # Может общаться только с БД, Redis, Telegram Bot и системой мониторинга
 
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: ollama
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama_data:/root/.ollama
+  # telegram_bot:
+  #   build:
+  #     context: ../telegram-bot
+  #     dockerfile: Dockerfile
+  #   image: deadwood-telegram-bot:latest
+  #   container_name: telegram_bot
+  #   cpus: '0.5'
+  #   mem_limit: '512m'
+  #   environment:
+  #     - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+  #     - DEADWOOD_API_URL=http://deadwood:8000
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - REDIS_PASSWORD=rediska
+  #     - DJANGO_ENV=settings
+  #   depends_on:
+  #     - deadwood
+  #     - redis
   #   restart: always
   #   networks:
-  #     - deadwood_net
+  #     backend_net:
+  #       aliases:
+  #         - telegram_bot
+  #   # Может общаться только с Deadwood, Worker, Beat и Redis
 
   db:
     image: postgres:17-alpine
@@ -132,7 +233,13 @@ services:
       POSTGRES_DB: "postgres"
     restart: always
     networks:
-      - deadwood_net
+      database_net:
+        aliases:
+          - db
+      backend_net:
+        aliases:
+          - db
+    # Может общаться только с backend сервисами и своим экспортером
 
   postgres_exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -141,10 +248,16 @@ services:
     environment:
       DATA_SOURCE_NAME: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
     networks:
-      - deadwood_net
+      database_net:
+        aliases:
+          - postgres_exporter
+      monitoring_net:
+        aliases:
+          - postgres_exporter
     depends_on:
       - db
     restart: always
+    # Может общаться только с БД и Prometheus
 
   redis:
     image: redis:7.0.15
@@ -159,18 +272,28 @@ services:
       - REDIS_PASSWORD=rediska
     restart: always
     networks:
-      - deadwood_net
+      database_net:
+        aliases:
+          - redis
+      backend_net:
+        aliases:
+          - redis
+    # Может общаться только с backend сервисами и своим экспортером
 
   redis_exporter:
     image: oliver006/redis_exporter:latest
     expose:
       - "9121"
-    command: [ "--redis.addr=redis:6379" ]
-    # environment:
-    #   - REDIS_PASSWORD=rediska
-    restart: always
+    command: ["--redis.addr=redis:6379"]
     networks:
-      - deadwood_net
+      database_net:
+        aliases:
+          - redis_exporter
+      monitoring_net:
+        aliases:
+          - redis_exporter
+    restart: always
+    # Может общаться только с Redis и Prometheus
 
   prometheus:
     image: prom/prometheus:latest
@@ -185,11 +308,10 @@ services:
       - "9090:9090"
     restart: always
     networks:
-      - deadwood_net
-    depends_on:
-      - deadwood
-      - loki
-      - promtail
+      monitoring_net:
+        aliases:
+          - prometheus
+    # Собирает метрики со всех экспортеров
 
   loki:
     image: grafana/loki:2.9.0
@@ -203,7 +325,10 @@ services:
       - "3100:3100"
     restart: always
     networks:
-      - deadwood_net
+      monitoring_net:
+        aliases:
+          - loki
+    # Принимает логи от Promtail
 
   promtail:
     image: grafana/promtail:2.9.0
@@ -216,12 +341,15 @@ services:
       - loki
     restart: always
     networks:
-      - deadwood_net
+      monitoring_net:
+        aliases:
+          - promtail
+    # Собирает логи и отправляет в Loki
 
   tempo:
     image: grafana/tempo:2.9.0
     container_name: tempo
-    command: [ "-config.file=/etc/tempo/tempo.yaml" ]
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
     volumes:
       - ../tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo_data:/var/tempo
@@ -231,11 +359,16 @@ services:
       - "4318"
     restart: always
     networks:
-      - deadwood_net
+      monitoring_net:
+        aliases:
+          - tempo
+      backend_net:
+        aliases:
+          - tempo
+    # Принимает трейсы от backend сервисов
 
   grafana:
     image: grafana/grafana:11.0.0
-    #build: ../grafana
     container_name: grafana
     depends_on:
       - prometheus
@@ -245,22 +378,25 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SERVER_ROOT_URL: "http://localhost:3000"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "false"
     volumes:
       - grafana_data:/var/lib/grafana
       - ../grafana/provisioning:/etc/grafana/provisioning
       - ../grafana/dashboards:/var/lib/grafana/dashboards
     restart: always
     networks:
-      - deadwood_net
+      monitoring_net:
+        aliases:
+          - grafana
+    # Визуализирует данные из мониторинга, доступна для WAF
 
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
-    networks:
-      - deadwood_net
     pid: host
     restart: always
-    expose:
+    expose: 
       - 9100
     volumes:
       - /proc:/host/proc:ro
@@ -271,6 +407,10 @@ services:
       - "--path.sysfs=/host/sys"
       - "--collector.filesystem.ignored-mount-points"
       - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+    networks:
+      monitoring_net:
+        aliases:
+          - node_exporter
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -278,7 +418,9 @@ services:
     expose:
       - 8080
     networks:
-      - deadwood_net
+      monitoring_net:
+        aliases:
+          - cadvisor
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw
@@ -295,7 +437,3 @@ volumes:
   grafana_data:
   tempo_data:
   global_logs:
-
-
-networks:
-  deadwood_net:

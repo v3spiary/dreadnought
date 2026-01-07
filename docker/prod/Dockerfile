@@ -53,13 +53,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 RUN groupadd -g 1000 deadwood && useradd -u 1000 -g deadwood -m deadwood
 
-RUN mkdir -p /var/log/django && \
-    touch /var/log/django/django.log && \
-    touch /var/log/django/django_error.log && \
-    touch /var/log/django/celery.log && \
-    chown -R deadwood:deadwood /var/log/django && \
-    chmod 755 /var/log/django
-
 # STAGE 3: DRF REST API
 FROM base AS server
 

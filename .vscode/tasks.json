@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker: Start Dev Stack",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml up -d --build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Запускает весь стек для разработки"
+    },
+    {
+      "label": "Docker: Stop Dev Stack",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml down",
+      "problemMatcher": [],
+      "detail": "Останавливает стек разработки"
+    },
+    {
+      "label": "Docker: View Logs (Backend)",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml logs -f backend",
+      "problemMatcher": [],
+      "detail": "Показывает логи Django"
+    },
+    {
+      "label": "Docker: View Logs (Frontend)",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml logs -f frontend",
+      "problemMatcher": [],
+      "detail": "Показывает логи Vue"
+    },
+    {
+      "label": "Docker: View Logs (Celery)",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml logs -f celery",
+      "problemMatcher": [],
+      "detail": "Показывает логи Celery"
+    },
+    {
+      "label": "Django: Run Migrations",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml exec backend python manage.py migrate",
+      "problemMatcher": [],
+      "detail": "Применяет миграции"
+    },
+    {
+      "label": "Django: Run Tests",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml exec backend pytest -v",
+      "problemMatcher": [],
+      "detail": "Запускает тесты"
+    },
+    {
+      "label": "Backend: Shell",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml exec backend python manage.py shell_plus",
+      "problemMatcher": [],
+      "detail": "Открывает Django shell"
+    },
+    {
+      "label": "Frontend: Install Dependencies",
+      "type": "shell",
+      "command": "docker-compose -f docker-compose/docker-compose-dev.yml exec frontend npm install",
+      "problemMatcher": [],
+      "detail": "Устанавливает Node.js зависимости"
+    }
+  ]
+}

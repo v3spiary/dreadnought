@@ -1,320 +1,180 @@
 services:
-  # waf:
-  #   image: owasp/modsecurity-crs:4.21.0-nginx-alpine-202512071012
-  #   container_name: waf-proxy
-  #   ports:
-  #     - "80:8080"
-  #   environment:
-  #     - BACKEND=http://frontend:80
-  #     - UPSTREAM_PORT=80
-  #     - NGINX_ENTRYPOINT_QUIET_LOGS=1
-  #     - MODSECURITY_RULE_ENGINE=On
-  #     - PARANOIA=1
-  #   volumes:
-  #     - ../waf/custom-rules:/etc/nginx/custom-rules:ro
-  #   networks:
-  #     - deadwood_net
-  #   depends_on:
-  #     frontend:
-  #       condition: service_healthy
-  #   restart: unless-stopped
-
-  deadwood:
+  frontend:
     build:
       context: ../
-      dockerfile: docker/Dockerfile
-      target: server
-      args:
-        - VITE_API_BASE_URL=http://localhost/api/v1/
-        - VITE_WS_BASE_URL=ws://localhost/ws/
-    image: deadwood-backend:latest
-    cpus: '2.0'
-    mem_limit: '2g'
+      dockerfile: docker/dev/Dockerfile
+      target: frontend
+    platform: linux/amd64
+    container_name: deadwood-frontend-dev
+    volumes:
+      - ../frontend:/app:delegated
+      - /app/node_modules
+    ports:
+      - "5173:5173" # Vite dev server
+      - "9229:9229" # Node.js debugger
+    environment:
+      - NODE_ENV=development
+      - VITE_API_BASE_URL=http://localhost:8000/api/v1/
+      - VITE_WS_BASE_URL=ws://localhost:8000/ws/
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_OPTIONS=--inspect=0.0.0.0:9229
+    networks:
+      - deadwood_dev_net
+    # command: npm run dev -- --host 0.0.0.0 --port 5173
+
+  backend:
+    build:
+      context: ../
+      dockerfile: docker/dev/Dockerfile
+      target: dev-server
+      # args:
+      #   USERNAME: ${USER:-deadwood}
+      #   USER_UID: ${UID:-1000}
+      #   USER_GID: ${GID:-1000}
+    container_name: deadwood-backend-dev
+    volumes:
+      - ../backend:/app:delegated
+      # - backend_python_cache:/app/__pycache__
+      # - /app/venv
+      # - ../backend:/app:ro
     ports:
       - "8000:8000"
+      - "5678:5678" # Python debugger
+      - "5679:5679" # Test debugger
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=config.dev
       - DB_HOST=db
       - DB_PORT=5432
-      - DJANGO_ENV=settings
-      - API_HOST=127.0.0.1
-      - API_PORT=80
-      - OTEL_PYTHON_LOG_LEVEL=DEBUG
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
-      - OTEL_SERVICE_NAME=deadwood
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
-    depends_on:
-      - db
-      - redis
-      - tempo
-    volumes:
-      - global_logs:/var/log/django:rw
-    restart: always
-    networks:
-      - deadwood_net
-
-  worker:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-      target: worker
-    image: deadwood-worker:latest
-    cpus: '1.0'
-    mem_limit: '1g'
-    environment:
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=deadwood_dev
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DJANGO_ENV=settings
-      - API_HOST=127.0.0.1
-      - API_PORT=80
-      - OTEL_PYTHON_LOG_LEVEL=DEBUG
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
-      - OTEL_SERVICE_NAME=deadwood
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
-    depends_on:
-      - db
-      - redis
-    volumes:
-      - global_logs:/var/log/django:ro
-    restart: always
+      - REDIS_URL=redis://redis:6379/0
+      - DEBUG_MODE=${DEBUG_MODE:-run} # run|debug|test
+      - PYTHONPATH=/app
+      - PYTHONBREAKPOINT=debugpy.breakpoint
+      - WATCHFILES_FORCE_POLLING=true
     networks:
-      - deadwood_net
-
-  beat:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-      target: beat
-    image: deadwood-beat:latest
-    cpus: '1.0'
-    mem_limit: '1g'
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_PORT=5432
-      - DJANGO_ENV=settings
-      - API_HOST=127.0.0.1
-      - API_PORT=80
-      - OTEL_PYTHON_LOG_LEVEL=DEBUG
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://tempo:4317
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
-      - OTEL_SERVICE_NAME=deadwood
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=deadwood,service.namespace=sre
+      - deadwood_dev_net
     depends_on:
-      - db
-      - redis
-      - deadwood
-      - worker
-    volumes:
-      - global_logs:/var/log/django:ro
-    restart: always
-    networks:
-      - deadwood_net
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    # command: >
+    #   sh -c "python -m debugpy --listen 0.0.0.0:5678 --wait-for-client  manage.py runserver 0.0.0.0:8000 --noreload"
+    stdin_open: true
+    tty: true
+    healthcheck:
+      test: [ "CMD", "python3", "-c", "import django; print('Django OK')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: ollama
-  #   ports:
-  #     - "11434:11434"
+  # celery:
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/dev/Dockerfile
+  #     target: dev-worker
+  #   image: deadwood-celery-dev:latest
+  #   container_name: deadwood-celery-dev
   #   volumes:
-  #     - ollama_data:/root/.ollama
-  #   restart: always
+  #     - ../backend:/app:delegated
+  #     - backend_python_cache:/app/__pycache__
+  #   ports:
+  #     - "5680:5680"
+  #   environment:
+  #     - DEBUG=1
+  #     - DJANGO_SETTINGS_MODULE=config.settings.development
+  #     - DB_HOST=db
+  #     - DB_PORT=5432
+  #     - POSTGRES_DB=deadwood_dev
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
+  #     - CELERY_RESULT_BACKEND=redis://redis:6379/0
+  #     - PYTHONPATH=/app
+  #     - PYTHONBREAKPOINT=debugpy.breakpoint
   #   networks:
-  #     - deadwood_net
+  #     - deadwood_dev_net
+  #   depends_on:
+  #     - db
+  #     - redis
+  #     - backend
+  #   command: >
+  #     sh -c "python -m debugpy --listen 0.0.0.0:5680 --wait-for-client  -m celery -A config worker --loglevel=info --concurrency=2 -E"
+
+  # beat:
+  #   build:
+  #     context: ../
+  #     dockerfile: docker/dev/Dockerfile
+  #     target: dev-beat
+  #   image: deadwood-beat-dev:latest
+  #   container_name: deadwood-beat-dev
+  #   volumes:
+  #     - ../backend:/app:delegated
+  #     - backend_python_cache:/app/__pycache__
+  #   environment:
+  #     - DEBUG=1
+  #     - DJANGO_SETTINGS_MODULE=config.settings.development
+  #     - DB_HOST=db
+  #     - DB_PORT=5432
+  #     - POSTGRES_DB=deadwood_dev
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - REDIS_URL=redis://redis:6379/0
+  #     - CELERY_BROKER_URL=redis://redis:6379/0
+  #   networks:
+  #     - deadwood_dev_net
+  #   depends_on:
+  #     - db
+  #     - redis
+  #     - backend
+  #     - celery
+  #   command: celery -A config beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
 
   db:
     image: postgres:17-alpine
-    container_name: postgresql
-    cpus: '1.0'
-    mem_limit: '1g'
-    expose:
-      - "5432"
+    container_name: deadwood-postgres-dev
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_dev:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "postgres"
-      POSTGRES_DB: "postgres"
-    restart: always
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: deadwood_dev
+    ports:
+      - "5432:5432"
     networks:
-      - deadwood_net
-
-  postgres_exporter:
-    image: prometheuscommunity/postgres-exporter:latest
-    expose:
-      - "9187"
-    environment:
-      DATA_SOURCE_NAME: "postgresql://postgres:postgres@db:5432/postgres?sslmode=disable"
-    networks:
-      - deadwood_net
-    depends_on:
-      - db
-    restart: always
+      - deadwood_dev_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
-    image: redis:7.0.15
-    container_name: redis
-    cpus: '0.5'
-    mem_limit: '512m'
-    expose:
-      - 6379
+    image: redis:7-alpine
+    container_name: deadwood-redis-dev
     volumes:
-      - redis_data:/data
-    environment:
-      - REDIS_PASSWORD=rediska
-    restart: always
-    networks:
-      - deadwood_net
-
-  redis_exporter:
-    image: oliver006/redis_exporter:latest
-    expose:
-      - "9121"
-    command: ["--redis.addr=redis:6379"]
-    # environment:
-    #   - REDIS_PASSWORD=rediska
-    restart: always
-    networks:
-      - deadwood_net
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-    volumes:
-      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - redis_data_dev:/data
     ports:
-      - "9090:9090"
-    restart: always
+      - "6379:6379"
     networks:
-      - deadwood_net
-    depends_on:
-      - deadwood
-      - loki
-      - promtail
-
-  loki:
-    image: grafana/loki:2.9.0
-    container_name: loki
-    command: -config.file=/etc/loki/loki-config.yaml
-    user: "0:0"
-    volumes:
-      - ../loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
-      - loki_data:/loki
-    ports:
-      - "3100:3100"
-    restart: always
-    networks:
-      - deadwood_net
-
-  promtail:
-    image: grafana/promtail:2.9.0
-    container_name: promtail
-    command: -config.file=/etc/promtail/promtail-config.yml
-    volumes:
-      - ../promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
-      - global_logs:/var/log/django:ro
-    depends_on:
-      - loki
-    restart: always
-    networks:
-      - deadwood_net
-
-  tempo:
-    image: grafana/tempo:2.9.0
-    container_name: tempo
-    command: ["-config.file=/etc/tempo/tempo.yaml"]
-    volumes:
-      - ../tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
-      - tempo_data:/var/tempo
-    expose:
-      - "3200"
-      - "4317"
-      - "4318"
-    restart: always
-    networks:
-      - deadwood_net
-
-  grafana:
-    image: grafana/grafana:11.0.0
-    #build: ../grafana
-    container_name: grafana
-    depends_on:
-      - prometheus
-      - loki
-    ports:
-      - "3000:3000"
-    environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ../grafana/provisioning:/etc/grafana/provisioning
-      - ../grafana/dashboards:/var/lib/grafana/dashboards
-    restart: always
-    networks:
-      - deadwood_net
-
-  node_exporter:
-    image: quay.io/prometheus/node-exporter:latest
-    container_name: node_exporter
-    networks:
-      - deadwood_net
-    pid: host
-    restart: always
-    expose: 
-      - 9100
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
-    command:
-      - "--path.procfs=/host/proc"
-      - "--path.sysfs=/host/sys"
-      - "--collector.filesystem.ignored-mount-points"
-      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
-
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: cadvisor
-    expose:
-      - 8080
-    networks:
-      - deadwood_net
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-    restart: always
+      - deadwood_dev_net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  redis_data:
-  postgres_data:
-  ollama_data:
-  loki_data:
-  prometheus_data:
-  grafana_data:
-  tempo_data:
-  global_logs:
+  postgres_data_dev:
+  redis_data_dev:
+  backend_python_cache:
+  frontend_node_modules:
+
 
 networks:
-  deadwood_net:
+  deadwood_dev_net:
+    driver: bridge

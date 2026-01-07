@@ -1,17 +1,63 @@
-"""Общие настройки проекта."""
+"""Конфигурация всего проекта."""
 
+import logging
 import os
 from datetime import timedelta
 from os import environ
 from pathlib import Path
+import json
 
+from celery.schedules import crontab
 from django.core.management.utils import get_random_secret_key
+# from opentelemetry import trace
+# from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+# from opentelemetry.instrumentation.celery import CeleryInstrumentor
+# from opentelemetry.instrumentation.django import DjangoInstrumentor
+# from opentelemetry.instrumentation.logging import LoggingInstrumentor
+# from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+# from opentelemetry.instrumentation.redis import RedisInstrumentor
+# from opentelemetry.sdk.trace import TracerProvider
+# from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_random_secret_key()
 
-DEBUG = False
+DEBUG = True
+
+HOST = environ.get("API_HOST")
+
+PORT = environ.get("API_PORT")
+
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "backend",
+    HOST,
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1",
+    "http://127.0.0.1:8000",
+    f"http://{HOST}",
+    f"http://{HOST}:{PORT}",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://127.0.0.1",
+    "http://localhost",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+    f"http://{HOST}",
+    f"http://{HOST}:{PORT}",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 DATETIME_FORMAT = "%d.%m.%Y %H:%M"
 
@@ -35,7 +81,6 @@ INSTALLED_APPS = [
     "channels",
     # REST framework
     "rest_framework",
-    'rest_framework.authtoken',
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "djoser",
@@ -51,7 +96,6 @@ MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -61,12 +105,95 @@ MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
+# Настройки OpenTelemetry
+# OTEL_ENABLED = environ.get("OTEL_ENABLED", "false").lower() == "true"
+# OTEL_EXPORTER_OTLP_ENDPOINT = environ.get(
+#     "OTEL_EXPORTER_OTLP_ENDPOINT", "http://tempo:4317"
+# )
+# OTEL_SERVICE_NAME = environ.get("OTEL_SERVICE_NAME", "deadwood-api")
+# OTEL_PYTHON_LOG_CORRELATION = (
+#     environ.get("OTEL_PYTHON_LOG_CORRELATION", "true").lower() == "true"
+# )
+
+# # Настройка провайдера трассировки
+# trace.set_tracer_provider(TracerProvider())
+
+# # Настройка экспортера для Tempo
+# otlp_exporter = OTLPSpanExporter(
+#     endpoint=OTEL_EXPORTER_OTLP_ENDPOINT,
+#     insecure=True,
+# )
+
+# # Добавление процессора для пакетной обработки
+# span_processor = BatchSpanProcessor(otlp_exporter)
+# trace.get_tracer_provider().add_span_processor(span_processor)
+
+# # Инструментация Django
+# DjangoInstrumentor().instrument()
+# RedisInstrumentor().instrument()
+# Psycopg2Instrumentor().instrument()
+# CeleryInstrumentor().instrument()
+# LoggingInstrumentor().instrument(
+#     set_logging_format=True,
+#     log_level=logging.INFO,
+# )
+
+# Настройки Prometheus
+PROMETHEUS_EXPORT_MIGRATIONS = False  # Отключаем экспорт миграций
+PROMETHEUS_LATENCY_BUCKETS = (
+    0.01,
+    0.025,
+    0.05,
+    0.075,
+    0.1,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    2.5,
+    5.0,
+    7.5,
+    10.0,
+    25.0,
+    50.0,
+    75.0,
+    float("inf"),
+)
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
             "hosts": [os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")],
         },
+    },
+}
+
+# Настройки Celery
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_WORKER_HIJACK_ROOT_LOGGER = False
+
+# Prometheus для Celery
+CELERY_WORKER_PROMETHEUS_PORTS = environ.get(
+    "CELERY_WORKER_PROMETHEUS_PORTS", "8880,8881"
+).split(",")
+
+# Пример периодических задач
+CELERY_BEAT_SCHEDULE = {
+    "daily-maintenance": {
+        "task": "chatbot.tasks.daily_maintenance",
+        "schedule": crontab(hour=0, minute=0),
+    },
+    "cleanup-old-traces": {
+        "task": "config.tasks.cleanup_old_traces",
+        "schedule": crontab(hour=3, minute=0),
+        "kwargs": {"days": 30},
     },
 }
 
@@ -199,6 +326,102 @@ DATABASES = {
     }
 }
 
+# Настройки логирования с ротацией
+# LOG_LEVEL = environ.get("LOG_LEVEL", "INFO").upper()
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "simple": {
+#             "format": "[%(levelname)s] %(message)s",
+#             "style": "%",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",
+#         },
+#         "verbose": {
+#             "format": """
+#                 %(asctime)s
+#                 [%(levelname)s]
+#                 trace_id=%(otelTraceID)s
+#                 span_id=%(otelSpanID)s
+#                 resource.service.name=%(otelServiceName)s
+#                 -
+#                 [%(threadName)s]
+#                 -
+#                 %(name)s
+#                 -
+#                 (%(filename).%(funcName)s(%(lineno)d)
+#                 -
+#                 %(message)s
+#                 """,
+#             "style": "%",
+#             "datefmt": "%Y-%m-%d %H:%M:%S",
+#         },
+#         "json": {
+#             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+#             "format": json.dumps(
+#                 {
+#                     "asctime": "%(asctime)s",
+#                     "name": "%(name)s",
+#                     "levelname": "%(levelname)s",
+#                     "message": "%(message)s",
+#                     "module": "%(module)s",
+#                     "funcName": "%(funcName)s",
+#                     "lineno": "%(lineno)d",
+#                     "process": "%(process)d",
+#                     "thread": "%(thread)d",
+#                     "otelTraceID": "%(otelTraceID)s",
+#                     "otelSpanID": "%(otelSpanID)s",
+#                     "otelTraceSampled": "%(otelTraceSampled)s",
+#                     "otelServiceName": "%(otelServiceName)s",
+#                 }
+#             ),
+#             "json_ensure_ascii": False,
+#             "rename_fields": {
+#                 "asctime": "timestamp",
+#                 "levelname": "level",
+#                 "name": "logger",
+#             },
+#         },
+#     },
+#     "handlers": {
+#         "console": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "json",
+#         },
+#     },
+#     "loggers": {
+#         "": {
+#             "handlers": ["console"],
+#             "level": LOG_LEVEL,
+#             "propagate": True,
+#         },
+#         "asgi": {
+#             "handlers": ["console"],
+#             "level": LOG_LEVEL,
+#             "propagate": False,
+#         },
+#         "uvicorn": {
+#             "handlers": ["console"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "uvicorn.access": {
+#             "handlers": ["console"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "uvicorn.error": {
+#             "handlers": ["console"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#     },
+# }
+
+# Настройки для Django-Prometheus
+PROMETHEUS_METRIC_EXPORT_PORT_RANGE = range(8001, 8050)
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -234,12 +457,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "/static/"
-
-BUNDLE_DIR = "/app/frontend_dist"
-
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = STATIC_DIR
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

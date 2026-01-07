@@ -59,18 +59,20 @@ urlpatterns += [
     ),
 ]
 
-# 2. Статика SPA (assets)
-urlpatterns += [
-    re_path(
-        r"^assets/(?P<path>.*)$",
-        serve,
-        {
-            "document_root": os.path.join(settings.BUNDLE_DIR, "assets"),
-        },
-    ),
-]
+if settings.DEBUG == False:
+    
+    # 2. Статика SPA (assets)
+    urlpatterns += [
+        re_path(
+            r"^assets/(?P<path>.*)$",
+            serve,
+            {
+                "document_root": os.path.join(settings.BUNDLE_DIR, "assets"),
+            },
+        ),
+    ]
 
-# 3. SPAView
-urlpatterns += [
-    re_path(r"^(?!api|admin|static|assets).*$", SPAView.as_view(), name="spa"),
-]
+    # 3. SPAView
+    urlpatterns += [
+        re_path(r"^(?!api|admin|static|assets).*$", SPAView.as_view(), name="spa"),
+    ]
