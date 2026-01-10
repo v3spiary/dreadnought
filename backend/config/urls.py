@@ -1,6 +1,7 @@
 """Эндпоинты проекта, их объявление начинается здесь."""
 
 import os
+import logging
 
 from django.conf import settings
 from django.contrib import admin
@@ -13,6 +14,9 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+
+# Set up logger
+logger = logging.getLogger(__name__)
 
 
 class SPAView(View):
@@ -33,8 +37,9 @@ class SPAView(View):
 
 urlpatterns = [
     path("not_your_fucking_business//", admin.site.urls),  # админка
-    path("api/v1/", include("auth_app.urls")),
-    path("api/v1/", include("chatbot.urls")),
+    path("api/v1/auth/", include("auth_app.urls")),
+    path("api/v1/chatbot/", include("chatbot.urls")),
+    path("api/v1/tracker/", include("tracker.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",
@@ -43,10 +48,7 @@ urlpatterns = [
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     path("", include("django_prometheus.urls")),
-    # re_path(r"^(?!api|admin|static).*", SPAView.as_view(), name="spa")
 ]
-
-# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # 1. Статика Django
 urlpatterns += [
@@ -60,17 +62,20 @@ urlpatterns += [
 ]
 
 if settings.DEBUG == False:
-    
+
     # 2. Статика SPA (assets)
-    urlpatterns += [
-        re_path(
-            r"^assets/(?P<path>.*)$",
-            serve,
-            {
-                "document_root": os.path.join(settings.BUNDLE_DIR, "assets"),
-            },
-        ),
-    ]
+    try:
+        urlpatterns += [
+            re_path(
+                r"^assets/(?P<path>.*)$",
+                serve,
+                {
+                    "document_root": os.path.join(settings.BUNDLE_DIR, "assets"),
+                },
+            ),
+        ]
+    except Exception as e:
+        logger.warning("Url Bundle Error detected", exc_info=True)
 
     # 3. SPAView
     urlpatterns += [

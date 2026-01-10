@@ -13,7 +13,7 @@ from chatbot.serializers import ChatSerializer, MessageSerializer
 # from .tasks import generate_ai_response
 
 # Set up logger
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
 
 class ChatViewSet(viewsets.ModelViewSet):

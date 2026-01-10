@@ -1,9 +1,9 @@
 """Модуль конфигурации проекта."""
 
-from .common import *
-from .policy import *
-from .celery import *
-from .channels import *
-from .logs import *
-from .metrics import *
-from .traces import *
+from .celery import * # noqa
+from .channels import * # noqa
+from .common import * # noqa
+from .logs import * # noqa
+from .metrics import * # noqa
+from .policy import * # noqa
+from .traces import * # noqa

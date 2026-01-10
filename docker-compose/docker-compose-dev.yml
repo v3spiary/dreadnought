@@ -71,37 +71,36 @@ services:
       timeout: 10s
       retries: 3
 
-  # celery:
-  #   build:
-  #     context: ../
-  #     dockerfile: docker/dev/Dockerfile
-  #     target: dev-worker
-  #   image: deadwood-celery-dev:latest
-  #   container_name: deadwood-celery-dev
-  #   volumes:
-  #     - ../backend:/app:delegated
-  #     - backend_python_cache:/app/__pycache__
-  #   ports:
-  #     - "5680:5680"
-  #   environment:
-  #     - DEBUG=1
-  #     - DJANGO_SETTINGS_MODULE=config.settings.development
-  #     - DB_HOST=db
-  #     - DB_PORT=5432
-  #     - POSTGRES_DB=deadwood_dev
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - REDIS_URL=redis://redis:6379/0
-  #     - CELERY_BROKER_URL=redis://redis:6379/0
-  #     - CELERY_RESULT_BACKEND=redis://redis:6379/0
-  #     - PYTHONPATH=/app
-  #     - PYTHONBREAKPOINT=debugpy.breakpoint
-  #   networks:
-  #     - deadwood_dev_net
-  #   depends_on:
-  #     - db
-  #     - redis
-  #     - backend
+  celery:
+    build:
+      context: ../
+      dockerfile: docker/dev/Dockerfile
+      target: dev-worker
+    image: deadwood-celery-dev:latest
+    container_name: deadwood-celery-dev
+    volumes:
+      - ../backend:/app:delegated
+    ports:
+      - "5680:5680"
+    environment:
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=config.dev
+      - DB_HOST=db
+      - DB_PORT=5432
+      - POSTGRES_DB=deadwood_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - PYTHONPATH=/app
+      - PYTHONBREAKPOINT=debugpy.breakpoint
+    networks:
+      - deadwood_dev_net
+    depends_on:
+      - db
+      - redis
+      - backend
   #   command: >
   #     sh -c "python -m debugpy --listen 0.0.0.0:5680 --wait-for-client  -m celery -A config worker --loglevel=info --concurrency=2 -E"
 
@@ -168,12 +167,28 @@ services:
       timeout: 5s
       retries: 5
 
+  # opensearch:
+  #   image: opensearchproject/opensearch:latest
+  #   container_name: deadwood-opensearch-dev
+  #   environment:
+  #     - discovery.type=single-node
+  #     - DISABLE_SECURITY_PLUGIN=true
+  #     - DISABLE_INSTALL_DEMO_CONFIG=true
+  #   ports:
+  #     - "9200:9200"
+  #     - "9600:9600"
+  #   volumes:
+  #     - opensearch-data:/usr/share/opensearch/data
+  #   restart: always
+  #   networks:
+  #     - deadwood_dev_net
+
 volumes:
   postgres_data_dev:
   redis_data_dev:
   backend_python_cache:
   frontend_node_modules:
-
+  opensearch-data:
 
 networks:
   deadwood_dev_net:

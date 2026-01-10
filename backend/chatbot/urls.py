@@ -9,5 +9,5 @@ router = DefaultRouter()
 router.register(r"chats", views.ChatViewSet, basename="chat")
 
 urlpatterns = [
-    path("chatbot/", include(router.urls)),
+    path("", include(router.urls)),
 ]

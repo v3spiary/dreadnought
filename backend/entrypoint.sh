@@ -13,6 +13,19 @@ python3 manage.py makemigrations --no-input
 python3 manage.py migrate --no-input
 python3 manage.py initdb
 
+curl -X PUT "opensearch:9200/tracker_metrics" -H 'Content-Type: application/json' -d'
+{
+  "mappings": {
+    "properties": {
+      "date": {"type": "date"},
+      "user_id": {"type": "keyword"},
+      "calories": {"type": "float"},
+      "steps": {"type": "long"}
+    }
+  },
+  "settings": {"refresh_interval": "1s"}
+}'
+
 exec uvicorn config.asgi:application \
   --host 0.0.0.0 \
   --port 8000

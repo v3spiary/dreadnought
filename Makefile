@@ -28,25 +28,28 @@ db:
 	docker-compose -f docker-compose/docker-compose-dev.yml exec db psql -U postgres deadwood_dev
 
 test:
-	docker-compose -f docker-compose/docker-compose-dev.yml exec backend pytest -v
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py test tracker --settings=config.test_settings
 
 test-debug:
 	docker-compose -f docker-compose/docker-compose-dev.yml run --rm -p 5679:5679 backend \
-		python -m debugpy --listen 0.0.0.0:5679 --wait-for-client -m pytest
+		python3 -m debugpy --listen 0.0.0.0:5679 --wait-for-client -m pytest
+
+migrations:
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py makemigrations
 
 migrate:
-	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python manage.py migrate
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py migrate
 
 shell:
-	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python manage.py shell_plus
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py shell_plus
 
 attach-django:
 	docker-compose -f docker-compose/docker-compose-dev.yml exec -d backend \
-		python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000
+		python3 -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000
 
 attach-celery:
 	docker-compose -f docker-compose/docker-compose-dev.yml exec -d celery \
-		python -m debugpy --listen 0.0.0.0:5680 --wait-for-client -m celery -A config worker -l info
+		python3 -m debugpy --listen 0.0.0.0:5680 --wait-for-client -m celery -A config worker -l info
 
 build:
 	docker-compose -f docker-compose/docker-compose-dev.yml build
@@ -56,3 +59,9 @@ rebuild:
 
 rebuild-frontend:
 	docker-compose -f docker-compose/docker-compose-dev.yml build --no-cache frontend
+
+drop:
+	docker-compose -f docker-compose/docker-compose-dev.yml down -v db
+	docker-compose -f docker-compose/docker-compose-dev.yml up -d db
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py makemigrations
+	docker-compose -f docker-compose/docker-compose-dev.yml exec backend python3 manage.py migrate

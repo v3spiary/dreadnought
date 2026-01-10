@@ -92,7 +92,8 @@ USER deadwood
 
 EXPOSE 5680
 
-CMD ["python3", "-m", "debugpy", "--listen", "0.0.0.0:5680", "--wait-for-client", "-m celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=2", "-E"]
+#CMD ["python3", "-m", "debugpy.adapter", "--listen", "0.0.0.0:5680", "--wait-for-client", "--", "python3", "-m", "celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=2", "-E"]
+ENTRYPOINT python3 -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5680 --wait-for-client -m celery -A config worker --loglevel=info --concurrency=4
 
 # STAGE 5: DEV CELERY BEAT
 FROM dev-worker AS dev-beat

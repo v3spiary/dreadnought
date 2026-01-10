@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "channels",
     # REST framework
     "rest_framework",
-    'rest_framework.authtoken',
+    "rest_framework.authtoken",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "djoser",
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # Кастомные приложения
     "auth_app",
     "chatbot",
+    "tracker",
 ]
 
 MIDDLEWARE = [

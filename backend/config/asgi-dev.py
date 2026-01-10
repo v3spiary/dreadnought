@@ -8,14 +8,13 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/asgi/
 """
 
 import os
-import debugpy
 
+import debugpy
 from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
 
 import chatbot.routing
 from chatbot.middleware import JWTAuthMiddleware
-
 
 DEBUG_PORT = 5678
 DEBUG_HOST = "0.0.0.0"

@@ -109,7 +109,8 @@
       "name": "Full Stack Debug",
       "configurations": [
         "Debug Django",
-        "Debug Vue"
+        "Debug Vue",
+        "Debug Celery Worker"
       ],
       "stopAll": true,
       "presentation": {
@@ -117,16 +118,5 @@
         "order": 1
       }
     },
-    {
-      "name": "Backend + Celery",
-      "configurations": [
-        "Debug Django",
-        "Debug Celery Worker"
-      ],
-      "presentation": {
-        "group": "backend",
-        "order": 2
-      }
-    }
   ]
 }
