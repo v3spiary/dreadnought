@@ -88,12 +88,9 @@ onMounted(() => {
 <template>
   <div class="uk-container uk-container-large uk-margin-top">
     <!-- Заголовок -->
-    <div class="uk-margin-large-bottom">
-      <h1 class="uk-heading-medium uk-text-bold uk-margin-remove">Profile Settings</h1>
-      <p class="uk-text-muted uk-margin-small-top">
-        Manage your account settings and preferences
-      </p>
-    </div>
+    <div>
+    <h3 class="uk-margin-middle-bottom">Profile Settings</h3>
+  </div>
     
     <!-- Основной контент в сетке -->
     <div class="uk-grid uk-grid-medium" uk-grid>
@@ -243,7 +240,7 @@ onMounted(() => {
     </div>
     
     <!-- Внешний вид -->
-    <div class="uk-margin-top">
+    <!-- <div class="uk-margin-top">
       <div class="uk-card uk-card-default uk-card-body">
         <h3 class="uk-card-title uk-margin-remove-bottom">Appearance</h3>
         <div class="uk-form-stacked uk-margin-top">
@@ -268,7 +265,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     
     <!-- Действия с аккаунтом -->
     <div class="uk-margin-top">

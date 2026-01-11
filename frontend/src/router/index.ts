@@ -20,8 +20,13 @@ const router = createRouter({
       component: MainLayout,
       meta: { requiresAuth: true },
       children: [
-        { path: 'chat', component: () => import('@/views/NewChat.vue'), meta: { title: 'Chat' } },
-        { path: 'chat/:id', component: () => import('@/views/Chat.vue'), meta: { title: 'Loading...' } },
+        { path: 'tracker', component: () => import('@/views/Tracker.vue'), meta: { title: 'Tracker' } },
+        { path: 'collector', component: () => import('@/views/Collector.vue'), meta: { title: 'Collector' } },
+        { path: 'startup', component: () => import('@/views/Startup.vue'), meta: { title: 'Startup' } },
+        { path: 'reader', component: () => import('@/views/Reader.vue'), meta: { title: 'Reader' } },
+        { path: 'transcription', component: () => import('@/views/Transcription.vue'), meta: { title: 'Transcription' } },
+        // { path: 'chat', component: () => import('@/views/NewChat.vue'), meta: { title: 'Chat' } },
+        { path: 'chat', component: () => import('@/views/Chat.vue'), meta: { title: 'Chat' } },
         { path: 'profile', component: () => import('@/views/Profile.vue'), meta: { title: 'Profile' } },
       ],
     },
@@ -47,7 +52,7 @@ router.beforeEach(async (to, from, next) => {
   
   // Check if route requires guest (not authenticated)
   if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next('/service/chat')
+    next('/service/tracker')
     return
   }
   

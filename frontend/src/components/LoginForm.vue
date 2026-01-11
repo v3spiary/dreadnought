@@ -24,34 +24,35 @@ const handleLogin = async () => {
   
   const result = await authStore.login(form.value)
   if (result.success) {
-    router.push('/service/chat')
+    router.push('/service/tracker')
   }
 }
 
 onMounted(() => {
   // Redirect if already authenticated
   if (authStore.isAuthenticated) {
-    router.push('/service/chat')
+    router.push('/service/tracker')
   }
 })
 </script>
 
 <template>
   <div class="uk-flex uk-flex-center uk-flex-middle" :class="props.class" style="min-height: 100vh;">
-    <div class="uk-width-large uk-card uk-card-default uk-card-body uk-box-shadow-medium">
+    <div class="uk-card uk-card-default uk-card-body uk-box-shadow-medium">
       <div class="uk-text-center uk-margin-medium-bottom">
-        <h1 class="uk-card-title uk-margin-remove">Login to your account</h1>
+        <img src="/logo.svg" width="70px" height="70px"/>
       </div>
 
       <form @submit.prevent="handleLogin">
         <div class="uk-margin">
-          <div class="uk-form-controls">
+          <div class="uk-inline">
+            <span class="uk-form-icon" uk-icon="icon: user"></span>
             <input
               id="username"
               v-model="form.username"
               class="uk-input"
               type="text"
-              placeholder="Enter your username"
+              placeholder=""
               autocomplete="username"
               required
               :disabled="authStore.isLoading"
@@ -60,13 +61,14 @@ onMounted(() => {
         </div>
 
         <div class="uk-margin">
-          <div class="uk-form-controls">
+          <div class="uk-inline">
+            <span class="uk-form-icon" uk-icon="icon: lock"></span>
             <input
               id="password"
               v-model="form.password"
               class="uk-input"
               type="password"
-              placeholder="Enter your password"
+              placeholder=""
               autocomplete="current-password"
               required
               :disabled="authStore.isLoading"
@@ -74,10 +76,10 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="uk-margin">
+        <div class="uk-margin" style="text-align: center;">
           <button
             type="submit"
-            class="uk-button uk-button-primary uk-width-1-1"
+            class="uk-button uk-button-primary"
             :disabled="authStore.isLoading"
           >
             <span v-if="authStore.isLoading" class="uk-margin-small-right" uk-spinner="ratio: 0.8"></span>

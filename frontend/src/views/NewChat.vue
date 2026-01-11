@@ -30,53 +30,22 @@ function handleKeyDown(e: KeyboardEvent) {
 </script>
 
 <template>
-  <div class="uk-flex uk-flex-center uk-flex-middle" style="min-height: 80vh;">
-    <div class="uk-width-1-1 uk-width-large@m uk-padding">
-      <!-- Заголовок и статус -->
-      <div class="uk-text-center uk-margin-large-bottom">
-        <h1 class="uk-heading-medium uk-text-bold uk-margin-remove uk-text-primary">DEADWOOD</h1>
-        <p class="uk-text-lead uk-text-muted uk-margin-small-top">
-          AI assistant
-        </p>
-      </div>
-
-      <!-- Форма ввода -->
-      <form @submit.prevent="send" class="uk-form-stacked">
-        <div class="uk-grid-small" uk-grid>
-          <!-- Текстовое поле -->
-          <div class="uk-width-expand">
-            <div class="uk-inline uk-width-1-1">
-              <textarea
-                v-model="input"
-                @keydown="handleKeyDown"
-                :disabled="sending"
-                class="uk-textarea uk-border-rounded"
-                placeholder="Ask, Search or Chat..."
-                rows="3"
-                style="resize: none;"
-              ></textarea>
-            </div>
-          </div>
-          
-          <!-- Кнопки управления -->
-          <div class="uk-width-auto">
-            <div class="uk-flex uk-flex-column uk-flex-between uk-height-1-1">
-              <div class="uk-flex uk-flex-wrap uk-flex-right">
-                <!-- Кнопка отправки -->
-                <button
-                  type="submit"
-                  :disabled="sending || !input.trim()"
-                  class="uk-button uk-button-primary uk-border-rounded"
-                  style="padding: 12px 20px;"
-                >
-                  <span v-if="sending" uk-spinner="ratio: 0.8"></span>
-                  <span v-else uk-icon="arrow-up"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-    </div>
+  <div class="uk-width-1-6">
+    <ul class="uk-nav-default" uk-nav>
+        <li class="uk-active"><a href="#">New chat</a></li>
+        <li class="uk-parent uk-open">
+            <a href="#">Pinned <span uk-nav-parent-icon></span></a>
+            <ul class="uk-nav-sub">
+                <li><a href="#">Здарова</a></li>
+            </ul>
+        </li>
+        <li class="uk-parent">
+            <a href="#">History <span uk-nav-parent-icon></span></a>
+            <ul class="uk-nav-sub">
+                <li><a href="#">Sub item</a></li>
+                <li><a href="#">Sub item</a></li>
+            </ul>
+        </li>
+    </ul>
   </div>
 </template>
