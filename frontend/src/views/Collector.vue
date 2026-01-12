@@ -32,15 +32,15 @@ const sending = ref(false)
                     
                     <div>
                         <div uk-grid>
-                            <div class="uk-width-auto@m">
-                                <ul class="uk-tab-left" uk-tab="connect: #component-tab-left; animation: uk-animation-fade">
+                            <div class="uk-width-auto@m uk-flex-last@m">
+                                <ul class="uk-tab-right" uk-tab="connect: #component-tab-right; animation: uk-animation-fade">
                                     <li><a href="#">1</a></li>
                                     <li><a href="#">2</a></li>
                                     <li><a href="#">3</a></li>
                                 </ul>
                             </div>
                             <div class="uk-width-expand@m">
-                                <div id="component-tab-left" class="uk-switcher">
+                                <div id="component-tab-right" class="uk-switcher">
                                     <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
                                     <div>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
                                     <div>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, sed do eiusmod.</div>
@@ -73,15 +73,15 @@ const sending = ref(false)
                     
                     <div>
                         <div uk-grid>
-                            <div class="uk-width-auto@m">
-                                <ul class="uk-tab-left" uk-tab="connect: #component-tab-left; animation: uk-animation-fade">
+                            <div class="uk-width-auto@m uk-flex-last@m">
+                                <ul class="uk-tab-right" uk-tab="connect: #component-tab-right; animation: uk-animation-fade">
                                     <li><a href="#">14</a></li>
                                     <li><a href="#">25</a></li>
                                     <li><a href="#">36</a></li>
                                 </ul>
                             </div>
                             <div class="uk-width-expand@m">
-                                <div id="component-tab-left" class="uk-switcher">
+                                <div id="component-tab-right" class="uk-switcher">
                                     <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
                                     <div>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
                                     <div>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, sed do eiusmod.</div>

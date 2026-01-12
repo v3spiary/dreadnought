@@ -3,6 +3,13 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '@/lib/api'
 
+import { 
+  Info, Users, FlaskConical, LineChart, 
+  Package, AlertTriangle, HelpCircle,
+  Square, Handshake,
+  CreditCard, Wallet, UserCog, CalendarCheck 
+} from 'lucide-vue-next';
+
 const router = useRouter()
 const input = ref('')
 const sending = ref(false)
@@ -12,21 +19,80 @@ const sending = ref(false)
 <template>
     <!-- Модалка -->
     <div id="modal-startup-detail" class="uk-modal-container" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" uk-overflow-auto>
             <div class="uk-container">
                 <button class="uk-modal-close-default" type="button" uk-close></button>
                                     
                 <article class="uk-article uk-margin-bottom">
 
-                    <h3 class="uk-article-title">Название проекта</h3>
+                    <h3 class="uk-article-title">Источник информации</h3>
+                    <p class="uk-article-meta">Пока не придумал че это будет</p>
 
-                    <p class="uk-article-meta">Written by <a href="#">Super User</a> on 12 April 2012. Posted in <a href="#">Blog</a></p>
+                    <p class="uk-article-meta">
+                        <span class="uk-label uk-margin-xsmall-right uk-margin-xsmall-top">Default</span>
+                        <span class="uk-label uk-label-success uk-margin-xsmall-right uk-margin-xsmall-top">Success</span>
+                        <span class="uk-label uk-label-warning uk-margin-xsmall-right uk-margin-xsmall-top">Warning</span>
+                        <span class="uk-label uk-label-danger uk-margin-xsmall-right uk-margin-xsmall-top">Danger</span>
+                    </p>
+                    
+                    <div>
+                        <div uk-grid>
+                            <div class="uk-width-auto@m uk-flex-last@m">
+                                <ul class="uk-tab-right" uk-tab="connect: #component-tab-right; animation: uk-animation-fade">
+                                    <li><a href="#"><Info :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Общая информация</a></li>
+                                    <li><a href="#"><Users :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Целевая аудитория</a></li>
+                                    <li><a href="#"><FlaskConical :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Гипотезы</a></li>
 
-                    <p class="uk-text-lead">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
+                                    <li><a href="#"><CreditCard :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Модель монетизации</a></li>
+                                    <li><a href="#"><Wallet :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Статьи затрат</a></li>
+                                    <li><a href="#"><UserCog :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Команда</a></li>
+                                    <li><a href="#"><CalendarCheck :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Планирование работы</a></li>
 
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                    <li><a href="#"><AlertTriangle :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Риски</a></li>
+                                    <li><a href="#"><HelpCircle :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Допущения</a></li>
+                                    <li><a href="#"><Square :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Границы</a></li>
+                                    <li><a href="#"><Handshake :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Стейкхолдеры</a></li>
+
+                                    <li><a href="#"><LineChart :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Финансовая модель</a></li>
+                                    <li><a href="#"><Package :size="20" stroke-width="1.5" style="padding-right: 5px;" /> Unit-экономика</a></li>
+                                </ul>
+                            </div>
+                            <div class="uk-width-expand@m">
+                                <div id="component-tab-right" class="uk-switcher">
+                                    <div>
+                                        1
+                                    </div>
+                                    <div>
+                                        2
+                                    </div>
+                                    <div>
+                                        3
+                                    </div>
+                                    <div>
+                                        4
+                                    </div>
+                                    <div>
+                                        5
+                                    </div>
+                                    <div>
+                                        6
+                                    </div>
+                                    <div>
+                                        7
+                                    </div>
+                                    <div>
+                                        8
+                                    </div>
+                                    <div>
+                                        9
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </article>
+
             </div>
         </div>
     </div>

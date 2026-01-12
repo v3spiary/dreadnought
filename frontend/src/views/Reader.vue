@@ -12,21 +12,42 @@ const sending = ref(false)
 <template>
     <!-- Модалка -->
     <div id="modal-reader-detail" class="uk-modal-container" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" uk-overflow-auto>
             <div class="uk-container">
                 <button class="uk-modal-close-default" type="button" uk-close></button>
                                     
                 <article class="uk-article uk-margin-bottom">
 
-                    <h3 class="uk-article-title">Мир на Земле</h3>
+                    <h3 class="uk-article-title">Информационный узел</h3>
 
-                    <p class="uk-article-meta">Автор: <a href="#">С. Лем</a></p>
-
-                    <p class="uk-text-lead">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</p>
-
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                    <p class="uk-article-meta">
+                        <span class="uk-label uk-margin-xsmall-right uk-margin-xsmall-top">Default</span>
+                        <span class="uk-label uk-label-success uk-margin-xsmall-right uk-margin-xsmall-top">Success</span>
+                        <span class="uk-label uk-label-warning uk-margin-xsmall-right uk-margin-xsmall-top">Warning</span>
+                        <span class="uk-label uk-label-danger uk-margin-xsmall-right uk-margin-xsmall-top">Danger</span>
+                    </p>
+                    
+                    <div>
+                        <div uk-grid>
+                            <div class="uk-width-auto@m uk-flex-last@m">
+                                <ul class="uk-tab-right" uk-tab="connect: #component-tab-right; animation: uk-animation-fade">
+                                    <li><a href="#">14</a></li>
+                                    <li><a href="#">25</a></li>
+                                    <li><a href="#">36</a></li>
+                                </ul>
+                            </div>
+                            <div class="uk-width-expand@m">
+                                <div id="component-tab-right" class="uk-switcher">
+                                    <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                                    <div>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</div>
+                                    <div>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur, sed do eiusmod.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </article>
+
             </div>
         </div>
     </div>
