@@ -15,83 +15,55 @@ import { Activity, Container, Rocket, BookOpen, MicVocal, BrainCircuit, User } f
                     <div class="uk-navbar-left">
                         <a class="uk-navbar-item uk-logo" href="#" aria-label="Back to Home">
                             <img src="/logo.svg" style="filter: invert(1);" width="42px" height="42px"/>
-                            <!-- <h4>DΞΛDWOOD</h4> -->
                         </a>
                     </div>
 
                     <div class="uk-navbar-right">
 
                         <ul class="uk-navbar-nav">
-                            <li v-if="$route.path === '/service/tracker'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/tracker' }">
                                 <a href="/service/tracker">
                                     <Activity :size="20" class="icon" style="padding-right: 3px;" /> Tracker
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/tracker">
-                                    <Activity :size="20" class="icon" style="padding-right: 3px;" /> Tracker
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/collector'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/collector' }">
                                 <a href="/service/collector">
                                     <Container :size="20" class="icon" style="padding-right: 3px;" /> Collector
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/collector">
-                                    <Container :size="20" class="icon" style="padding-right: 3px;" /> Collector
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/startup'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/startup' }">
                                 <a href="/service/startup">
                                     <Rocket :size="20" class="icon" style="padding-right: 3px;" /> Startup
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/startup">
-                                    <Rocket :size="20" class="icon" style="padding-right: 3px;" /> Startup
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/reader'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/reader' }">
                                 <a href="/service/reader">
                                     <BookOpen :size="20" class="icon" style="padding-right: 3px;" /> Reader
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/reader">
-                                    <BookOpen :size="20" class="icon" style="padding-right: 3px;" /> Reader
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/transcription'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/transcription' }">
                                 <a href="/service/transcription">
                                     <MicVocal :size="20" class="icon" style="padding-right: 3px;" /> Transcription
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/transcription">
-                                    <MicVocal :size="20" class="icon" style="padding-right: 3px;" /> Transcription
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/chat'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path.startsWith('/service/chat') }">
                                 <a href="/service/chat">
                                     <BrainCircuit :size="20" class="icon" style="padding-right: 3px;" /> AI Assistant
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/chat">
-                                    <BrainCircuit :size="20" class="icon" style="padding-right: 3px;" /> AI Assistant
-                                </a>
-                            </li>
-                            <li v-if="$route.path === '/service/profile'" class="uk-active">
+
+                            <li :class="{ 'uk-active': $route.path === '/service/profile' }">
                                 <a href="/service/profile">
                                     <User :size="20" class="icon" style="padding-right: 3px;" /> Profile
                                 </a>
                             </li>
-                            <li v-else>
-                                <a href="/service/profile">
-                                    <User :size="20" class="icon" style="padding-right: 3px;" /> Profile
-                                </a>
-                            </li>
+
                         </ul>
 
                     </div>

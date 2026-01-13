@@ -108,7 +108,7 @@ onMounted(() => {
   
 </template>
 
-<style>
+<style scoped>
     @font-face {
         font-family: namu;
         src: url('/fonts/namu.ttf');

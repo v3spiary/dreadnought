@@ -1,9 +1,3 @@
-<template>
-  <div id="app">
-    <router-view />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
@@ -19,3 +13,10 @@ onMounted(async () => {
   // Theme is automatically initialized in the store
 })
 </script>
+
+
+<template>
+  <div id="app">
+    <router-view />
+  </div>
+</template>
