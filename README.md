@@ -45,7 +45,28 @@ Deadwood project
 </details>
 
 <details>
-<summary>🏗️ <h2>Инфраструктура</h2></summary>
+<summary>🏗️ <h2>DevOps</h2></summary>
+
+<details>
+<summary> <h3>CI/CD</h3></summary>
+
+Содержимое подраздела.
+
+</details>
+
+<details>
+<summary> <h3>IaC</h3></summary>
+
+Содержимое подраздела.
+
+</details>
+
+<details>
+<summary> <h3>Мониторинг</h3></summary>
+
+Содержимое подраздела.
+
+</details>
 
 </details>
 
