@@ -6,4 +6,6 @@
 Deadwood project
 </h1>
 
-> Corrige praeteritum, praesens rege, cerne futurum.
+<p align="center">Corrige praeteritum, praesens rege, cerne futurum.</p>
+
+
