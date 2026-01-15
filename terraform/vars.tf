@@ -26,3 +26,9 @@ variable "sel_auth_url" {
   type        = string
   default     = "https://cloud.api.selcloud.ru/identity/v3/"
 }
+
+variable "sel_serv_user_id" {
+  description = "Selectel service acc user id"
+  type        = string
+  sensitive   = true
+}

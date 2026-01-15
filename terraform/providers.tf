@@ -31,12 +31,3 @@ provider "openstack" {
   password    = var.sel_password
   region      = var.sel_auth_region
 }
-
-resource "openstack_networking_network_v2" "network_1" {
-  name           = "private-network"
-  admin_state_up = "true"
-
-  depends_on = [
-    selectel_vpc_project_v2.project_deadwood
-  ]
-}
