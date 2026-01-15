@@ -35,23 +35,79 @@ Deadwood project
 </ul>
 </p>
 
-## Описание
+<details>
+<summary>📸 <strong>Скриншоты</strong></summary>
 
+*Содержимое раздела.*
 
+</details>
 
-## Модель угроз
+<details>
+<summary>📋 <strong>Описание</strong></summary>
 
+*Содержимое раздела.*
 
-## Инфраструктура
+</details>
 
+<details>
+<summary>🎯 <strong>Модель угроз</strong></summary>
 
-## Архитектура
+*Содержимое раздела.*
 
+</details>
 
-## Описание окружений
+<details>
+<summary>🏗️ <strong>Инфраструктура</strong></summary>
 
-### Dev
+*Содержимое раздела.*
 
-### Stage
+</details>
 
-### Prod
+<details>
+<summary>📐 <strong>Архитектура</strong></summary>
+
+### C4 - L1
+
+*Содержимое подраздела.*
+
+<details>
+<summary><strong>C4 - L2</strong></summary>
+
+*Содержимое подраздела.*
+
+</details>
+
+<details>
+<summary><strong>C4 - L3</strong></summary>
+
+*Содержимое подраздела.*
+
+</details>
+
+</details>
+
+<details>
+<summary>🌍 <strong>Описание окружений</strong></summary>
+
+<details>
+<summary>🟢 <strong>Dev</strong></summary>
+
+*Содержимое подраздела.*
+
+</details>
+
+<details>
+<summary>🟡 <strong>Stage</strong></summary>
+
+*Содержимое подраздела.*
+
+</details>
+
+<details>
+<summary>🔴 <strong>Prod</strong></summary>
+
+*Содержимое подраздела.*
+
+</details>
+
+</details>
