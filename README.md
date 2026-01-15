@@ -18,7 +18,7 @@ Deadwood project
 |  AI       | ![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white) ![Ollama](https://img.shields.io/badge/ollama-%23000000.svg?style=for-the-badge&logo=ollama&logoColor=white) ![HuggingFace](https://img.shields.io/badge/huggingface-%23FFD21E.svg?style=for-the-badge&logo=huggingface&logoColor=white) ![LangChain](https://img.shields.io/badge/langchain-%231C3C3C.svg?style=for-the-badge&logo=langchain&logoColor=white) ![LangGraph](https://img.shields.io/badge/langgraph-%231C3C3C.svg?style=for-the-badge&logo=langgraph&logoColor=white)  |
 
 <p align="center">
-<ul>
+<ul align="center">
 <li><a href="#описание">Описание</a></li>
 <li><a href="#модель-угроз">Модель угроз</a></li>
 <li><a href="#инфраструктура">Инфраструктура</a></li>
