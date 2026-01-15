@@ -19,14 +19,14 @@ Deadwood project
 
 <p align="center">
 <ul>
-<li><a>Описание</a></li>
-<li><a>Модель угроз</a></li>
-<li><a>Инфраструктура</a></li>
-<li><a>Архитектура</a></li>
+<li><a href="#описание">Описание</a></li>
+<li><a href="#модель-угроз">Модель угроз</a></li>
+<li><a href="#инфраструктура">Инфраструктура</a></li>
+<li><a href="#архитектура">Архитектура</a></li>
 <ul>
-<li>Dev</li>
-<li>Stage</li>
-<li>Prod</li>
+<li><a href="#dev">Dev</a></li>
+<li><a href="#stage">Stage</a></li>
+<li><a href="#prod">Prod</a></li>
 </ul>
 </ul>
 </p>
