@@ -20,49 +20,49 @@ Deadwood project
 |  AI       | ![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white) ![Ollama](https://img.shields.io/badge/ollama-%23000000.svg?style=for-the-badge&logo=ollama&logoColor=white) ![HuggingFace](https://img.shields.io/badge/huggingface-%23FFD21E.svg?style=for-the-badge&logo=huggingface&logoColor=white) ![LangChain](https://img.shields.io/badge/langchain-%231C3C3C.svg?style=for-the-badge&logo=langchain&logoColor=white) ![LangGraph](https://img.shields.io/badge/langgraph-%231C3C3C.svg?style=for-the-badge&logo=langgraph&logoColor=white)  |
 
 <details>
-<summary>📸 <h1>Скриншоты</h1></summary>
+<summary>📸 <h2>Скриншоты</h2></summary>
 
 Содержимое раздела.
 
 </details>
 
 <details>
-<summary>📋 <h1>Описание</h1></summary>
+<summary>📋 <h2>Описание</h2></summary>
 
 Содержимое раздела.
 
 </details>
 
 <details>
-<summary>🎯 <h1>Модель угроз</h1></summary>
+<summary>🎯 <h2>Модель угроз</h2></summary>
 
 Содержимое раздела.
 
 </details>
 
 <details>
-<summary>🏗️ <h1>Инфраструктура</h1></summary>
+<summary>🏗️ <h2>Инфраструктура</h2></summary>
 
 Содержимое раздела.
 
 </details>
 
 <details>
-<summary>📐 <h1>Архитектура</h1></summary>
+<summary>📐 <h2>Архитектура</h2></summary>
 
 ### C4 - L1
 
 Содержимое подраздела.
 
 <details>
-<summary><h1>C4 - L2</h1></summary>
+<summary><h2>C4 - L2</h2></summary>
 
 Содержимое подраздела.
 
 </details>
 
 <details>
-<summary><h1>C4 - L3</h1></summary>
+<summary><h2>C4 - L3</h2></summary>
 
 Содержимое подраздела.
 
@@ -71,24 +71,24 @@ Deadwood project
 </details>
 
 <details>
-<summary>🌍 <h1>Описание окружений</h1></summary>
+<summary>🌍 <h2>Описание окружений</h2></summary>
 
 <details>
-<summary>🟢 <h1>Dev</h1></summary>
+<summary>🟢 <h2>Dev</h2></summary>
 
 Содержимое подраздела.
 
 </details>
 
 <details>
-<summary>🟡 <h1>Stage</h1></summary>
+<summary>🟡 <h2>Stage</h2></summary>
 
 Содержимое подраздела.
 
 </details>
 
 <details>
-<summary>🔴 <h1>Prod</h1></summary>
+<summary>🔴 <h2>Prod</h2></summary>
 
 Содержимое подраздела.
 
