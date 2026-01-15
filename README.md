@@ -8,6 +8,9 @@ Deadwood project
 
 <i align="center">Corrige praeteritum, praesens rege, cerne futurum.</i>
 
+> [!NOTE]  
+> `Deadwood` — это мультиагентная система для управления временем и задачами, трекинга личной эффективности, контроля информационного потока, автоматизации бизнес-аналитики стартапов.
+
 |  Область  | Технология  |
 |-----------|-------------|
 | Security  | ![UFW](https://img.shields.io/badge/UFW-ubuntu-orange?logo=ubuntu&style=for-the-badge) ![ModSecurity](https://img.shields.io/badge/WAF-ModSecurity-000000?logo=apache&style=for-the-badge) ![Suricata](https://img.shields.io/badge/IDS-Suricata-1E417B?logo=github&style=for-the-badge) ![](https://img.shields.io/badge/SIEM-Wazuh-000000?logo=github&style=for-the-badge) ![](https://img.shields.io/badge/Threat_Intelligence-OpenCTI-000000?logo=github&style=for-the-badge) |
@@ -18,9 +21,6 @@ Deadwood project
 |  Backend  | ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54) ![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white) ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray) ![Celery](https://img.shields.io/badge/celery-%23a9cc54.svg?style=for-the-badge&logo=celery&logoColor=ddf4a4) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) |
 |  DB       |  ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white) ![Elasticsearch](https://img.shields.io/badge/elasticsearch-%230377CC.svg?style=for-the-badge&logo=elasticsearch&logoColor=white)   |
 |  AI       | ![nVIDIA](https://img.shields.io/badge/nVIDIA-%2376B900.svg?style=for-the-badge&logo=nVIDIA&logoColor=white) ![Ollama](https://img.shields.io/badge/ollama-%23000000.svg?style=for-the-badge&logo=ollama&logoColor=white) ![HuggingFace](https://img.shields.io/badge/huggingface-%23FFD21E.svg?style=for-the-badge&logo=huggingface&logoColor=white) ![LangChain](https://img.shields.io/badge/langchain-%231C3C3C.svg?style=for-the-badge&logo=langchain&logoColor=white) ![LangGraph](https://img.shields.io/badge/langgraph-%231C3C3C.svg?style=for-the-badge&logo=langgraph&logoColor=white)  |
-
-> [!NOTE]  
-> Deadwood — это мультиагентная система для управления временем и задачами, трекинга личной эффективности, контроля информационного потока, автоматизации бизнес-аналитики стартапов.
 
 <details>
 <summary>📸 <h2>Скриншоты</h2></summary>
