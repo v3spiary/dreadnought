@@ -54,6 +54,7 @@ services:
       - PYTHONPATH=/app
       - PYTHONBREAKPOINT=debugpy.breakpoint
       - WATCHFILES_FORCE_POLLING=true
+      - SECRET_KEY=hw948fjwo4fjw4fjw9u4jfw4hfouewrhgehrfgehjrgfuer
     networks:
       - deadwood_dev_net
     depends_on:
@@ -95,6 +96,7 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - PYTHONPATH=/app
       - PYTHONBREAKPOINT=debugpy.breakpoint
+      - SECRET_KEY=hw948fjwo4fjw4fjw9u4jfw4hfouewrhgehrfgehjrgfuer
     networks:
       - deadwood_dev_net
     depends_on:
@@ -183,16 +185,16 @@ services:
   #   networks:
   #     - deadwood_dev_net
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    restart: always
-    networks:
-      - deadwood_dev_net
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #   restart: always
+  #   networks:
+  #     - deadwood_dev_net
 
 volumes:
   postgres_data_dev:

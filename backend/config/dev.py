@@ -6,11 +6,10 @@ from os import environ
 from pathlib import Path
 
 from celery.schedules import crontab
-from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = get_random_secret_key()
+SECRET_KEY = environ.get("SECRET_KEY")
 
 DEBUG = True
 
