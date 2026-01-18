@@ -482,8 +482,12 @@ DEFAULT_FILE_STORAGE = "config.storage.MediaMinIOStorage"
 # Media files settings
 MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/"
 MEDIA_ROOT = ""
-MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = True # Optional: create bucket if it doesn't exist
-MINIO_STORAGE_AUTO_CREATE_MEDIA_POLICY = True # Optional: set public policy for media bucket
+MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = (
+    True  # Optional: create bucket if it doesn't exist
+)
+MINIO_STORAGE_AUTO_CREATE_MEDIA_POLICY = (
+    True  # Optional: set public policy for media bucket
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

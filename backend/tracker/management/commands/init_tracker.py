@@ -3,13 +3,13 @@
 Создает типы метрик и нормативы по умолчанию.
 """
 
-from django.core.management.base import BaseCommand
+
 from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
-from datetime import date, timedelta
-from tracker.models import MetricType, MetricTarget
-from django.conf import settings
+
+from tracker.models import MetricTarget, MetricType
 
 User = get_user_model()
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
 
     def create_metric_types(self, force=False):
         """Создание типов метрик"""
-        
+
         # Определяем типы метрик по умолчанию
         DEFAULT_METRICS = [
             # Питание
@@ -111,7 +111,6 @@ class Command(BaseCommand):
                 "description": "Пищевые волокна",
                 "order": 15,
             },
-            
             # Активность
             {
                 "code": "sleep",
@@ -129,7 +128,6 @@ class Command(BaseCommand):
                 "description": "Количество шагов за день",
                 "order": 21,
             },
-            
             # Интеллект
             {
                 "code": "math_tasks",
@@ -171,7 +169,6 @@ class Command(BaseCommand):
                 "description": "Количество прочитанных страниц",
                 "order": 34,
             },
-            
             # Силовые
             {
                 "code": "pushups",
@@ -214,11 +211,11 @@ class Command(BaseCommand):
         with transaction.atomic():
             for metric_data in DEFAULT_METRICS:
                 code = metric_data["code"]
-                
+
                 if force:
                     # Удаляем существующую метрику если force=True
                     MetricType.objects.filter(code=code).delete()
-                
+
                 obj, created = MetricType.objects.update_or_create(
                     code=code,
                     defaults={
@@ -228,9 +225,9 @@ class Command(BaseCommand):
                         "description": metric_data.get("description", ""),
                         "order": metric_data.get("order", 0),
                         "is_active": True,
-                    }
+                    },
                 )
-                
+
                 if created:
                     created_count += 1
                     self.stdout.write(
@@ -244,13 +241,15 @@ class Command(BaseCommand):
                 else:
                     skipped_count += 1
 
-        self.stdout.write(self.style.SUCCESS(
-            f"📊 Типы метрик: создано {created_count}, обновлено {updated_count}, пропущено {skipped_count}"
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"📊 Типы метрик: создано {created_count}, обновлено {updated_count}, пропущено {skipped_count}"
+            )
+        )
 
     def create_default_targets(self, username=None):
         """Создание нормативов по умолчанию"""
-        
+
         # Значения по умолчанию для нормативов
         DEFAULT_TARGETS = [
             # Питание
@@ -260,18 +259,15 @@ class Command(BaseCommand):
             {"code": "carbs", "target_type": "max", "value": 300},
             {"code": "water", "target_type": "min", "value": 3.0},
             {"code": "fiber", "target_type": "min", "value": 30},
-            
             # Активность
             {"code": "sleep", "target_type": "min", "value": 8.0},
             {"code": "steps", "target_type": "min", "value": 10000},
-            
             # Интеллект
             {"code": "math_tasks", "target_type": "min", "value": 3},
             {"code": "diary_entry", "target_type": "min", "value": 1},
             {"code": "leetcode_tasks", "target_type": "min", "value": 1},
             {"code": "ctf_tasks", "target_type": "min", "value": 1},
             {"code": "pages_read", "target_type": "min", "value": 20},
-            
             # Силовые (по желанию, можно комментировать)
             {"code": "pushups", "target_type": "min", "value": 50},
             {"code": "crunches", "target_type": "min", "value": 50},
@@ -289,7 +285,9 @@ class Command(BaseCommand):
                 return
         else:
             users = User.objects.all()
-            self.stdout.write(f"👥 Создание нормативов для всех пользователей ({users.count()})")
+            self.stdout.write(
+                f"👥 Создание нормативов для всех пользователей ({users.count()})"
+            )
 
         created_count = 0
         skipped_count = 0
@@ -301,8 +299,7 @@ class Command(BaseCommand):
                 for target_data in DEFAULT_TARGETS:
                     try:
                         metric_type = MetricType.objects.get(
-                            code=target_data["code"],
-                            is_active=True
+                            code=target_data["code"], is_active=True
                         )
                     except MetricType.DoesNotExist:
                         self.stdout.write(
@@ -341,7 +338,8 @@ class Command(BaseCommand):
                 f"  ✅ Созданы нормативы для пользователя: {user.username}"
             )
 
-        self.stdout.write(self.style.SUCCESS(
-            f"🎯 Нормативы: создано {created_count}, пропущено (уже существуют) {skipped_count}"
-        ))
-        
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"🎯 Нормативы: создано {created_count}, пропущено (уже существуют) {skipped_count}"
+            )
+        )

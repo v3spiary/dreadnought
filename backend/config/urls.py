@@ -1,7 +1,7 @@
 """Эндпоинты проекта, их объявление начинается здесь."""
 
-import os
 import logging
+import os
 
 from django.conf import settings
 from django.contrib import admin
